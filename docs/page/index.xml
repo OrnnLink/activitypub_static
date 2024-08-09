@@ -6,14 +6,35 @@
     <description>Recent content in Pages on My New Hugo Site</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 09 Aug 2024 10:34:39 +1000</lastBuildDate>
+    <lastBuildDate>Fri, 09 Aug 2024 15:35:53 +1000</lastBuildDate>
     <atom:link href="http://localhost:1313/activitypub_static/page/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>Running activitypub server leveraging static web hosting</title>
+      <title>Getting follow feature</title>
+      <link>http://localhost:1313/activitypub_static/page/extra/getting_follow_feature/</link>
+      <pubDate>Fri, 09 Aug 2024 15:35:53 +1000</pubDate>
+      <guid>http://localhost:1313/activitypub_static/page/extra/getting_follow_feature/</guid>
+      <description>yes&#xA;See Also&#xA;Running ActivityPub Server on Static Site </description>
+    </item>
+    <item>
+      <title>Publish Post Feature</title>
+      <link>http://localhost:1313/activitypub_static/page/extra/publish_post_feature/</link>
+      <pubDate>Fri, 09 Aug 2024 15:34:24 +1000</pubDate>
+      <guid>http://localhost:1313/activitypub_static/page/extra/publish_post_feature/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Following Feature</title>
+      <link>http://localhost:1313/activitypub_static/page/extra/following_feature/</link>
+      <pubDate>Fri, 09 Aug 2024 15:09:44 +1000</pubDate>
+      <guid>http://localhost:1313/activitypub_static/page/extra/following_feature/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Running an ActivityPub Server Leveraging Static Web Hosting</title>
       <link>http://localhost:1313/activitypub_static/page/running_activitypub_server_leveraging_static_web_hosting/</link>
       <pubDate>Fri, 09 Aug 2024 10:34:39 +1000</pubDate>
       <guid>http://localhost:1313/activitypub_static/page/running_activitypub_server_leveraging_static_web_hosting/</guid>
-      <description>Implementing a system that able to run ActivityPub server leveraging static web hosting.</description>
+      <description>Setting up a minimal ActivityPub-compatible static site involves integrating an ActivityPub server into the static site. The process includes creating a WebFinger file and an actor object, enabling user discovery by other platforms, along with a curated list of features to be implemented.</description>
     </item>
   </channel>
 </rss>

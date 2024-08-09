@@ -1,0 +1,108 @@
+<!doctype html> 
+<html> 
+	<head><script src="/activitypub_static/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=activitypub_static/livereload" data-no-instant defer></script>
+			
+		
+			
+			
+			<link rel="stylesheet" href="/activitypub_static/scss/style.css">
+		
+			
+			
+			<link rel="stylesheet" href="/activitypub_static/scss/list.css">
+		
+			
+			
+			<link rel="stylesheet" href="/activitypub_static/scss/single.css">
+		
+	</head>
+	<body> 
+		<header>
+	<nav class="navbar">
+		<h1>Publish Post Feature</h1>
+	</nav>
+</header>
+		
+	<div class="page-body">
+		<section class="title-heading">Publish Post Feature</section>
+		<section>Published: 2024-08-09 15:34:24 &#43;1000 AEST</section>
+		<hr>
+		<p>For a post to be visible on another user&rsquo;s instance, a relationship between your static site actor and the other actor is essential. Specifically, you must either follow the other user or have received a follow request from them that you accepted.</p>
+<p>Assuming these conditions are met, you can create a post and share it with your followers or those you follow.</p>
+<h3 id="example-simple-python-program-to-follow">Example: Simple Python Program to Follow</h3>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#888"># Assuming the following algorithm is in KeySigningHandler.py in the same directory</span>
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">import</span> <span style="color:#b06;font-weight:bold">requests</span>
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">from</span> <span style="color:#b06;font-weight:bold">ActivityHandler</span> <span style="color:#080;font-weight:bold">import</span> *
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#888"># URL pointing to your actor object</span>
+</span></span><span style="display:flex;"><span>actor_id = <span style="color:#d20;background-color:#fff0f0">&#34;https://noah.netlify.app/noah/actor.json&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#888"># Path to the private key generated using the &#34;Webfinger for Discovery Post&#34; algorithm</span>
+</span></span><span style="display:flex;"><span>private_key_path = <span style="color:#d20;background-color:#fff0f0">&#34;...&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#888"># Webfinger of the user you want to follow</span>
+</span></span><span style="display:flex;"><span>webfinger = <span style="color:#d20;background-color:#fff0f0">&#34;@alice@mastodon.social&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#888"># Activity Information</span>
+</span></span><span style="display:flex;"><span><span style="color:#888"># Store the post ID uniquely; in this case, it&#39;s the URL of the post</span>
+</span></span><span style="display:flex;"><span>post_id = <span style="color:#d20;background-color:#fff0f0">&#34;https://noah.netlify.app/posts/first&#34;</span>
+</span></span><span style="display:flex;"><span>content = <span style="color:#d20;background-color:#fff0f0">&#34;example content&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#888"># Flag indicating whether the post is public or private</span>
+</span></span><span style="display:flex;"><span>public = <span style="color:#080;font-weight:bold">True</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>handler = ActivityHandler(actor_id, private_key_path)
+</span></span><span style="display:flex;"><span>handler.send_publish_activity(
+</span></span><span style="display:flex;"><span>    post_id=post_id,
+</span></span><span style="display:flex;"><span>    content=content,
+</span></span><span style="display:flex;"><span>    public=public
+</span></span><span style="display:flex;"><span>)
+</span></span></code></pre></div><p><strong>Requirements:</strong></p>
+<ol>
+<li>URL pointing to your actor object.</li>
+<li>A brief description for the post you are sharing.</li>
+<li>The ID assigned to the post (can be a URL to the post or the post object itself).</li>
+<li>Webfinger of the user you follow or who has followed you.</li>
+</ol>
+<p><strong>Structure of a <code>@Create</code> Activity:</strong></p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#b06;font-weight:bold">&#34;@context&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;https://www.w3.org/ns/activitystreams&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#b06;font-weight:bold">&#34;type&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;Create&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#b06;font-weight:bold">&#34;id&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;{ID_OF_YOUR_POST}&#34;</span>, 
+</span></span><span style="display:flex;"><span>    <span style="color:#b06;font-weight:bold">&#34;actor&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;{YOUR_ACTOR_OBJECT_URL}&#34;</span>, 
+</span></span><span style="display:flex;"><span>    <span style="color:#b06;font-weight:bold">&#34;object&#34;</span>: {
+</span></span><span style="display:flex;"><span>        <span style="color:#b06;font-weight:bold">&#34;id&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;{ID_OF_YOUR_POST}&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#b06;font-weight:bold">&#34;type&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;Note&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#b06;font-weight:bold">&#34;attributedTo&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;{YOUR_ACTOR_OBJECT_URL}&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#b06;font-weight:bold">&#34;content&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;{CONTENT}&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#b06;font-weight:bold">&#34;to&#34;</span>: [ 
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;{YOUR_ACTOR_FOLLOWERS_URL}&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;https://www.w3.org/ns/activitystreams#Public&#34;</span>  <span style="color:#888">// Includes this if public
+</span></span></span><span style="display:flex;"><span><span style="color:#888"></span>        ],
+</span></span><span style="display:flex;"><span>        <span style="color:#b06;font-weight:bold">&#34;cc&#34;</span>: [ <span style="color:#d20;background-color:#fff0f0">&#34;{YOUR_ACTOR_FOLLOWERS_URL}&#34;</span> ]
+</span></span><span style="display:flex;"><span>    },
+</span></span><span style="display:flex;"><span>    <span style="color:#b06;font-weight:bold">&#34;published&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;...&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#b06;font-weight:bold">&#34;to&#34;</span>: [ 
+</span></span><span style="display:flex;"><span>        <span style="color:#d20;background-color:#fff0f0">&#34;{YOUR_ACTOR_FOLLOWERS_URL}&#34;</span>,
+</span></span><span style="display:flex;"><span>        <span style="color:#d20;background-color:#fff0f0">&#34;https://www.w3.org/ns/activitystreams#Public&#34;</span>  <span style="color:#888">// Includes this if public
+</span></span></span><span style="display:flex;"><span><span style="color:#888"></span>    ],
+</span></span><span style="display:flex;"><span>    <span style="color:#b06;font-weight:bold">&#34;cc&#34;</span>: [ <span style="color:#d20;background-color:#fff0f0">&#34;{YOUR_ACTOR_FOLLOWERS_URL}&#34;</span> ]
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><hr>
+<p><strong>References</strong></p>
+<ul>
+<li><a href="https://paul.kinlan.me/adding-activity-pub-to-your-static-site/">Adding ActivityPub to Your Static Site - Paul Kinlan</a></li>
+<li><a href="https://www.w3.org/TR/activitypub/#create-activity-outbox">Create Activity</a></li>
+</ul>
+<hr>
+<p><strong>See also</strong></p>
+<ul>
+<li><a href="/activitypub_static/page/running_activitypub_server_leveraging_static_web_hosting/">Running ActivityPub Server on Static Site</a></li>
+<li><a href="/activitypub_static/page/extra/getting_follow_feature">Getting Follow Feature</a></li>
+<li><a href="/activitypub_static/page/extra/follow_feature">Following Feature</a></li>
+</ul>
+
+	</div>
+
+	</body>
+</html>

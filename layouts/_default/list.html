@@ -1,10 +1,12 @@
 {{ define "main" }}
 	{{ .Content }}
-	{{ $excluded_pages := slice "Categories" "Tags" .Title "Pages"}}
-	{{ range $page := .Site.Pages }}
+	{{ $excluded_pages := slice "Categories" "Tags" .Title "Pages" "Extras"}}
+	{{ range $page := .Site.RegularPages }}
 		{{ $excluded := false }}
 		{{ range $ep := $excluded_pages }}
 			{{ if in $page.Title $ep }}
+				{{ $excluded = true }}
+			{{ else if in $page.Path "/extra/"}}
 				{{ $excluded = true }}
 			{{ end }}
 		{{ end }}
@@ -13,7 +15,7 @@
 				<fieldset>
 					<legend class="card-heading">{{ $page.Title }}</legend>
 						{{ if $page.Summary }}
-							{{ $page.Summary }}
+							<p>{{ $page.Summary }}</p>
 						{{ else }}
 							Empty WIP
 						{{ end }}

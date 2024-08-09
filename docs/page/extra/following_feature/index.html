@@ -1,0 +1,74 @@
+<!doctype html> 
+<html> 
+	<head><script src="/activitypub_static/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=activitypub_static/livereload" data-no-instant defer></script>
+			
+		
+			
+			
+			<link rel="stylesheet" href="/activitypub_static/scss/style.css">
+		
+			
+			
+			<link rel="stylesheet" href="/activitypub_static/scss/list.css">
+		
+			
+			
+			<link rel="stylesheet" href="/activitypub_static/scss/single.css">
+		
+	</head>
+	<body> 
+		<header>
+	<nav class="navbar">
+		<h1>Following Feature</h1>
+	</nav>
+</header>
+		
+	<div class="page-body">
+		<section class="title-heading">Following Feature</section>
+		<section>Published: 2024-08-09 15:09:44 &#43;1000 AEST</section>
+		<hr>
+		<p>Before implementing these features, you need to set up your WebFinger and actor object. Additionally, you must implement the required handler objects. For simplicity, we’ll use Python for this implementation. Once you have both the WebFinger and handler objects set up, you can use the following example to send a follow request to another user on ActivityPub instances.</p>
+<h3 id="example-simple-python-program-to-send-a-follow-request">Example: Simple Python Program to Send a Follow Request</h3>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#888"># Assuming the signing algorithm is implemented in KeySigningHandler.py in the same directory</span>
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">import</span> <span style="color:#b06;font-weight:bold">requests</span>
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">from</span> <span style="color:#b06;font-weight:bold">ActivityHandler</span> <span style="color:#080;font-weight:bold">import</span> *
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#888"># URL pointing to your actor object</span>
+</span></span><span style="display:flex;"><span>actor_id = <span style="color:#d20;background-color:#fff0f0">&#34;https://noah.netlify.app/noah/actor.json&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#888"># Path to the private key generated using the signing algorithm</span>
+</span></span><span style="display:flex;"><span>private_key_path = <span style="color:#d20;background-color:#fff0f0">&#34;...&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#888"># WebFinger of the user you want to follow</span>
+</span></span><span style="display:flex;"><span>webfinger = <span style="color:#d20;background-color:#fff0f0">&#34;@alice@mastodon.social&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>handler = ActivityHandler(actor_id, private_key_path)
+</span></span><span style="display:flex;"><span>handler.send_follow_activity(webfinger=webfinger)
+</span></span></code></pre></div><p><strong>Requirements:</strong></p>
+<ol>
+<li>URL pointing to your actor object.</li>
+<li>WebFinger of the person you want to follow.</li>
+</ol>
+<p><strong>Structure of a <code>@Follow</code> Activity:</strong></p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#b06;font-weight:bold">&#34;@context&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;https://www.w3.org/ns/activitystreams&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#b06;font-weight:bold">&#34;type&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;Follow&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#b06;font-weight:bold">&#34;actor&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;{YOUR_ACTOR_OBJECT_URL}&#34;</span>, 
+</span></span><span style="display:flex;"><span>    <span style="color:#b06;font-weight:bold">&#34;object&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;{TARGET_ACTOR_OBJECT_URL}&#34;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><hr>
+<p><strong>References</strong></p>
+<ul>
+<li><a href="https://paul.kinlan.me/adding-activity-pub-to-your-static-site/">Adding ActivityPub to Your Static Site - Paul Kinlan</a></li>
+<li><a href="https://www.w3.org/TR/activitypub/#follow-activity-outbox">Follow Activity</a></li>
+</ul>
+<hr>
+<p><strong>See also</strong></p>
+<ul>
+<li><a href="/activitypub_static/page/running_activitypub_server_leveraging_static_web_hosting/">Running ActivityPub Server on Static Site</a></li>
+</ul>
+
+	</div>
+
+	</body>
+</html>

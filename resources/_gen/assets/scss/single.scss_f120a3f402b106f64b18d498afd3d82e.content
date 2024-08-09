@@ -1,5 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter");
 @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk");
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono");
 * {
   margin: 0px;
   padding: 0px;
@@ -8,7 +9,21 @@
   box-sizing: border-box; }
 
 body {
-  font-family: "Inter", "Space Grotesk", "Helvectica", "Arial"; }
+  font-family: "Inter", "Space Grotesk", "Helvectica", "Arial";
+  font-size: 15px; }
+
+code {
+  font-family: "JetBrains Mono";
+  color: #864AF9;
+  padding: 0.1em 0.4em;
+  border-radius: 4px;
+  font-size: 0.9em;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-wrap: break-word; }
+
+p {
+  line-height: 25px; }
 
 .page-body {
   margin: 5%; }

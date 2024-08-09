@@ -1,5 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter");
 @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk");
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono");
 
 $font-stack: "Inter", "Space Grotesk", "Helvectica", "Arial";
 $primary-color: #332941;
@@ -18,6 +19,7 @@ $text-color: white;
 
 body {
 	font-family: $font-stack;	
+	font-size: 15px;
 }
 
 @mixin flex-box($align-items: start, $justify-content: start) {
@@ -36,9 +38,26 @@ body {
 	box-shadow: $secondary-color 0px 6px 0px;
 	transition: 0.5s;
 	text-decoration: none;
+	font-family: $font-stack;
 
 	&:hover {
 		scale: 1.2;
 		translate: 0px -3px;
+		color: $text-color;
 	}
+}
+
+code {
+	font-family: "JetBrains Mono";
+    color: $tertiary-color;
+    padding: 0.1em 0.4em;
+    border-radius: 4px;
+    font-size: 0.9em;
+    line-height: 1.5;
+    white-space: pre-wrap; 
+    word-wrap: break-word; 
+}
+
+p {
+	line-height: 25px;
 }
