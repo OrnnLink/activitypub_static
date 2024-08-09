@@ -1,0 +1,44 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter");
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk");
+
+$font-stack: "Inter", "Space Grotesk", "Helvectica", "Arial";
+$primary-color: #332941;
+$secondary-color: #3B3486;
+$tertiary-color: #864AF9;
+$accent-color: #F8E559;
+$text-color: white;
+
+* {
+	margin: 0px;
+	padding: 0px;
+	min-width: 0px;
+	min-height: 0px;
+	box-sizing: border-box;
+}
+
+body {
+	font-family: $font-stack;	
+}
+
+@mixin flex-box($align-items: start, $justify-content: start) {
+	display: flex;
+	align-items: $align-items;
+	justify-content: $justify-content;
+}
+
+@mixin page-btn {
+	@include flex-box(center, center);
+	padding: 0.5em;				
+	background-color: $tertiary-color;
+	color: $text-color;
+	border: none;
+	border-radius: 8px;
+	box-shadow: $secondary-color 0px 6px 0px;
+	transition: 0.5s;
+	text-decoration: none;
+
+	&:hover {
+		scale: 1.2;
+		translate: 0px -3px;
+	}
+}

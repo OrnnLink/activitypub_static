@@ -1,0 +1,35 @@
+@import "constants";
+
+.card-container {
+	margin: 5%;
+
+	.card-heading { 
+		padding: 1em;
+		background-color: $secondary-color;
+		border-radius: 8px;
+		text-transform: capitalize;
+		color: $text-color;
+	}
+
+	fieldset {
+		@include flex-box(center, start);
+		position: relative;
+		background-color: $text-color;
+		color: $secondary-color;
+		border-color: $secondary-color;
+		padding: 0.5em;
+		border-radius: 8px;
+		min-height: 130px;
+
+		p {
+			width: 88%;
+		}
+	}
+
+	.page-btn {
+		position: absolute;
+		bottom: 10px;
+		right: 10px;
+		width: 12%;
+	}
+}

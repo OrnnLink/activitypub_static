@@ -1,0 +1,15 @@
+<!doctype html> 
+<html> 
+	<head>
+		{{ $styles := slice "style" "list" "single" }}	
+		{{ range $style := $styles }}
+			{{ $style := printf "scss/%s.scss" $style }}
+			{{ $style := resources.Get $style | toCSS }}
+			<link rel="stylesheet" href="{{ $style.RelPermalink }}">
+		{{ end }}
+	</head>
+	<body> 
+		{{ partial "header" . }}
+		{{ block "main" . }}{{ end }}
+	</body>
+</html>

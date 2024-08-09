@@ -1,0 +1,27 @@
+{{ define "main" }}
+	{{ .Content }}
+	{{ $excluded_pages := slice "Categories" "Tags" .Title "Pages"}}
+	{{ range $page := .Site.Pages }}
+		{{ $excluded := false }}
+		{{ range $ep := $excluded_pages }}
+			{{ if in $page.Title $ep }}
+				{{ $excluded = true }}
+			{{ end }}
+		{{ end }}
+		{{ if not $excluded }}
+			<div class="card-container">
+				<fieldset>
+					<legend class="card-heading">{{ $page.Title }}</legend>
+						{{ if $page.Summary }}
+							{{ $page.Summary }}
+						{{ else }}
+							Empty WIP
+						{{ end }}
+					<a class="page-btn" href="{{ $page.RelPermalink }}">See More</a>
+				</fieldset>
+			</div>
+		{{ else }}
+		{{ end }}
+
+	{{ end }}
+{{ end }}

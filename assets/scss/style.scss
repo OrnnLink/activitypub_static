@@ -1,0 +1,17 @@
+@import "constants";
+
+.navbar {
+	@include flex-box(center, space-between);
+	background: $primary-color;
+	min-height: 100px;
+	color: $text-color;
+	padding: 10px;
+
+	h1 {
+		text-transform: capitalize;
+	}
+}
+
+.page-btn {
+	@include page-btn;	
+}

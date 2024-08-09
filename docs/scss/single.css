@@ -1,0 +1,36 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter");
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk");
+* {
+  margin: 0px;
+  padding: 0px;
+  min-width: 0px;
+  min-height: 0px;
+  box-sizing: border-box; }
+
+body {
+  font-family: "Inter", "Space Grotesk", "Helvectica", "Arial"; }
+
+.page-body {
+  margin: 5%; }
+  .page-body > * {
+    margin: 10px; }
+  .page-body .title-heading {
+    font-size: 30px;
+    font-weight: bold;
+    text-transform: capitalize;
+    color: #3B3486; }
+  .page-body ol li, .page-body ul li {
+    margin-top: 5px;
+    margin-left: 3%; }
+  .page-body table {
+    color: white;
+    width: 100%;
+    border-radius: 5px;
+    background-color: #864AF9; }
+    .page-body table th {
+      padding: 0.5em; }
+    .page-body table tbody {
+      background-color: white;
+      color: black; }
+      .page-body table tbody td {
+        padding: 0.5em; }

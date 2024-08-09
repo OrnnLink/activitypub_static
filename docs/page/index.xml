@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>My New Hugo Site</title>
-    <link>http://localhost:1313/activitypub_static/</link>
-    <description>Recent content on My New Hugo Site</description>
+    <title>Pages on My New Hugo Site</title>
+    <link>http://localhost:1313/activitypub_static/page/</link>
+    <description>Recent content in Pages on My New Hugo Site</description>
     <generator>Hugo</generator>
     <language>en-us</language>
     <lastBuildDate>Fri, 09 Aug 2024 10:34:39 +1000</lastBuildDate>
-    <atom:link href="http://localhost:1313/activitypub_static/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://localhost:1313/activitypub_static/page/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Running activitypub server leveraging static web hosting</title>
       <link>http://localhost:1313/activitypub_static/page/running_activitypub_server_leveraging_static_web_hosting/</link>

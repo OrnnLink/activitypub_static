@@ -1,5 +1,6 @@
-baseURL = 'https://example.org/'
+baseURL = 'https://ornnlink.github.io/activitypub_static'
 languageCode = 'en-us'
 title = 'My New Hugo Site'
+
 
 publishDir = "./docs"

@@ -1,0 +1,45 @@
+@import "constants";
+
+
+.page-body {
+	margin: 5%;
+
+	& > * {
+		margin: 10px;
+	}
+
+	.title-heading {
+		font-size: 30px;
+		font-weight: bold;
+		text-transform: capitalize;
+		color: $secondary-color;
+	}
+
+	ol, ul {
+		li {
+			margin-top: 5px;
+			margin-left: 3%;
+		}
+	}
+
+	table {
+	 	color: white;
+	 	width: 100%;
+	 	border-radius: 5px;	 		
+	 	background-color: $tertiary-color;	
+
+
+	 	th {
+	 		padding: 0.5em;
+	 	}
+
+	 	tbody {
+	  		background-color: white;
+	  		color: black;
+
+	  		td { 
+	  		 padding: 0.5em;
+	  		}
+	 	}
+	}
+}
