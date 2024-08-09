@@ -49,4 +49,5 @@ handler.send_follow_activity(webfinger=webfinger)
 ---
 
 **See also**
-- [Running ActivityPub Server on Static Site](/activitypub_static/page/running_activitypub_server_lever- [Codebase](/activitypub_static/page/extra/activitypub_codebase)aging_static_web_hosting/)
+- [Running ActivityPub Server on Static Site](/activitypub_static/page/running_activitypub_server_leveraging_static_web_hosting/)
+- [Codebase](/activitypub_static/page/extra/activitypub_codebase)
