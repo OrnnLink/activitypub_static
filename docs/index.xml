@@ -6,8 +6,22 @@
     <description>Recent content on My New Hugo Site</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 09 Aug 2024 16:09:39 +1000</lastBuildDate>
+    <lastBuildDate>Fri, 09 Aug 2024 16:47:53 +1000</lastBuildDate>
     <atom:link href="http://localhost:1313/activitypub_static/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Posting Reply Feature</title>
+      <link>http://localhost:1313/activitypub_static/page/extra/posting_reply_feature/</link>
+      <pubDate>Fri, 09 Aug 2024 16:47:53 +1000</pubDate>
+      <guid>http://localhost:1313/activitypub_static/page/extra/posting_reply_feature/</guid>
+      <description>In ActivityPub protocol, replying to an already existing post is similar to publish a new post, with an additional tag inReplyTo references the url to the id of the post you are making a reply to.&#xA;Example: Simple Python Program to Posting reply # Assuming the following algorithm is in KeySigningHandler.py in the same directory import requests from ActivityHandler import * # URL pointing to your actor object actor_id = &amp;#34;https://noah.</description>
+    </item>
+    <item>
+      <title>Getting Replies Feature</title>
+      <link>http://localhost:1313/activitypub_static/page/extra/getting_replies_feature/</link>
+      <pubDate>Fri, 09 Aug 2024 16:46:50 +1000</pubDate>
+      <guid>http://localhost:1313/activitypub_static/page/extra/getting_replies_feature/</guid>
+      <description>Given there exists a mutual relationship between your static site actor, and other ActivityPub platform user. Many ActivityPub platforms send out a HTTP POST request to your actor inbox, whenever the other actor publish new content that is relevant to you. Because our site is static by nature, we will not be able to actively listen for the requests and take appropriate action. Despite this, there are alternative measures we can take to solve this problems.</description>
+    </item>
     <item>
       <title>ActivityPub Codebase</title>
       <link>http://localhost:1313/activitypub_static/page/extra/activitypub_codebase/</link>
@@ -20,7 +34,7 @@
       <link>http://localhost:1313/activitypub_static/page/extra/getting_follow_feature/</link>
       <pubDate>Fri, 09 Aug 2024 15:35:53 +1000</pubDate>
       <guid>http://localhost:1313/activitypub_static/page/extra/getting_follow_feature/</guid>
-      <description> See also&#xA;Running ActivityPub Server on Static Site </description>
+      <description> See also&#xA;Running ActivityPub Server on Static Site Codebase </description>
     </item>
     <item>
       <title>Publish Post Feature</title>

@@ -18,8 +18,8 @@ For this project, we have prioritized the implementation of the following functi
 ### Priority 1 Features:
 - [Allowing someone to follow you](/activitypub_static/page/extra/getting_follow_feature)
 - [Publishing a post](/activitypub_static/page/extra/publish_post_feature)
-- [Viewing replies to your post]()
-- [Replying to a post]()
+- [Viewing replies to your post](/activitypub_static/page/extra/getting_replies_feature)
+- [Replying to a post](/activitypub_static/page/extra/posting_reply_feature)
 
 ### Priority 2 Features:
 - [Liking a post]()
