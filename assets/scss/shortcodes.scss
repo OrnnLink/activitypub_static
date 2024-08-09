@@ -1,0 +1,45 @@
+@import "constants";
+
+// Variables for colors
+// $note-bg-color: #f0f8ff;
+$note-bg-color: #6EACDA;
+$note-border-color: #b0c4de;
+$warning-bg-color: #fff3cd;
+$warning-border-color: #ffeeba;
+$tip-bg-color: #d4edda;
+$tip-border-color: #c3e6cb;
+
+// Mixin for callout
+@mixin callout($bg-color, $border-color) {
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  background-color: $bg-color;
+  border: 1px solid $border-color;
+
+  h4 {
+    text-transform: uppercase;
+  }
+
+  p {
+    margin-top: 10px;
+  }
+}
+
+// Base callout styles
+.callout {
+  @include callout($note-bg-color, $note-border-color);
+
+  &.note {
+    @include callout($note-bg-color, $note-border-color);
+    color: white;
+  }
+
+  &.warning {
+    @include callout($warning-bg-color, $warning-border-color);
+  }
+
+  &.tip {
+    @include callout($tip-bg-color, $tip-border-color);
+  }
+}

@@ -1,0 +1,68 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter");
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk");
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono");
+* {
+  margin: 0px;
+  padding: 0px;
+  min-width: 0px;
+  min-height: 0px;
+  box-sizing: border-box; }
+
+body {
+  font-family: "Inter", "Space Grotesk", "Helvectica", "Arial";
+  font-size: 15px; }
+
+code {
+  font-family: "JetBrains Mono";
+  color: #864AF9;
+  padding: 0.1em 0.4em;
+  border-radius: 4px;
+  font-size: 0.9em;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-wrap: break-word; }
+
+p {
+  line-height: 25px; }
+
+.callout {
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  background-color: #6EACDA;
+  border: 1px solid #b0c4de; }
+  .callout h4 {
+    text-transform: uppercase; }
+  .callout p {
+    margin-top: 10px; }
+  .callout.note {
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    background-color: #6EACDA;
+    border: 1px solid #b0c4de;
+    color: white; }
+    .callout.note h4 {
+      text-transform: uppercase; }
+    .callout.note p {
+      margin-top: 10px; }
+  .callout.warning {
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba; }
+    .callout.warning h4 {
+      text-transform: uppercase; }
+    .callout.warning p {
+      margin-top: 10px; }
+  .callout.tip {
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb; }
+    .callout.tip h4 {
+      text-transform: uppercase; }
+    .callout.tip p {
+      margin-top: 10px; }

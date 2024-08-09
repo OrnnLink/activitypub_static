@@ -1,7 +1,7 @@
 <!doctype html> 
 <html> 
 	<head>
-		{{ $styles := slice "style" "list" "single" }}	
+		{{ $styles := slice "style" "list" "single" "shortcodes"}}	
 		{{ range $style := $styles }}
 			{{ $style := printf "scss/%s.scss" $style }}
 			{{ $style := resources.Get $style | toCSS }}

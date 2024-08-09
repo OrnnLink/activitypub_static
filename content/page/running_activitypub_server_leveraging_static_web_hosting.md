@@ -151,3 +151,7 @@ By completing all the steps above, ActivityPub platforms will now be able to dis
 - [Adding ActivityPub to Your Static Site](https://paul.kinlan.me/adding-activity-pub-to-your-static-site/)
 - [Understanding WebFinger](https://webfinger.net/)
 - [Mastodon WebFinger](https://docs.joinmastodon.org/spec/webfinger/)
+
+---
+**See also** 
+- [Full codebase](/activitypub_static/page/extra/activitypub_codebase)
