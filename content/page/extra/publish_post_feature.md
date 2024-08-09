@@ -86,6 +86,7 @@ handler.send_publish_activity(
 - [Running ActivityPub Server on Static Site](/activitypub_static/page/running_activitypub_server_leveraging_static_web_hosting/)
 - [Getting Follow Feature](/activitypub_static/page/extra/getting_follow_feature)
 - [Following Feature](/activitypub_static/page/extra/follow_feature)
+- [Codebase](/activitypub_static/page/extra/activitypub_codebase)
 
 
 
