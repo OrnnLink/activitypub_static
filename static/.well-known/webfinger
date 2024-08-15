@@ -1,0 +1,11 @@
+{ 
+    "subject": "acct:noah@daniellay.cc",
+    "aliases": [],
+    "links": [
+        {
+            "rel": "self",
+            "type": "application/activity+json",
+            "href": "https://daniellay.cc/noah/actor.json"
+        }
+    ]
+}
