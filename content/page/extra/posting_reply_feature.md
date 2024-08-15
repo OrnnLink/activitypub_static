@@ -82,7 +82,7 @@ handler.send_reply_activity(
 ---
 
 **See also**
-- [Running ActivityPub Server on Static Site](/activitypub_static/page/running_activitypub_server_leveraging_static_web_hosting/)
-- [Codebase](/activitypub_static/page/extra/activitypub_codebase)
+- [Running ActivityPub Server on Static Site](/page/running_activitypub_server_leveraging_static_web_hosting/)
+- [Codebase](/page/extra/activitypub_codebase)
 
 

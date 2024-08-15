@@ -622,4 +622,4 @@ def __get_follower_from_ext_urls(data):
 
 ---
 **See also** 
-- [Running ActivityPub Server on Static Site](/activitypub_static/page/running_activitypub_server_leveraging_static_web_hosting/)
+- [Running ActivityPub Server on Static Site](/page/running_activitypub_server_leveraging_static_web_hosting/)

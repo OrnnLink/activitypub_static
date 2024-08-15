@@ -16,17 +16,17 @@ Notably, we focus on implementing a subset of activities listed on [W3.org](http
 For this project, we have prioritized the implementation of the following functionalities:
 
 ### Priority 1 Features:
-- [Allowing someone to follow you](/activitypub_static/page/extra/getting_follow_feature)
-- [Publishing a post](/activitypub_static/page/extra/publish_post_feature)
-- [Viewing replies to your post](/activitypub_static/page/extra/getting_replies_feature)
-- [Replying to a post](/activitypub_static/page/extra/posting_reply_feature)
+- [Allowing someone to follow you](/page/extra/getting_follow_feature)
+- [Publishing a post](/page/extra/publish_post_feature)
+- [Viewing replies to your post](/page/extra/getting_replies_feature)
+- [Replying to a post](/page/extra/posting_reply_feature)
 
 ### Priority 2 Features:
 - [Liking a post]()
 - [Seeing who liked your post]()
 - [Boosting/Announcing a person's post]()
 - [Seeing who boosted/announced your post]()
-- [Following someone](/activitypub_static/page/extra/following_feature)
+- [Following someone](/page/extra/following_feature)
 
 ### Priority 3 Features:
 - [Bookmarking a post]()
@@ -154,4 +154,4 @@ By completing all the steps above, ActivityPub platforms will now be able to dis
 
 ---
 **See also** 
-- [Full codebase](/activitypub_static/page/extra/activitypub_codebase)
+- [Full codebase](/page/extra/activitypub_codebase)
