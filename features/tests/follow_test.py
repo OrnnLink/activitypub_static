@@ -6,7 +6,7 @@ class FollowTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.actor_id = "https://sdlay.netlify.app/user-info/ylay/actor.json" 
-        cls.private_key_path = "../../private_key.pem"
+        cls.private_key_path = "private_key.pem"
         cls.handler = ActivityHandler(cls.actor_id, cls.private_key_path)
         
     def test_follow_non_existing_honk_user(self):

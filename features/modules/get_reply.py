@@ -139,11 +139,3 @@ class PostReplyHandler:
                     filtered_posts.append(post)
         return filtered_posts
 
-# if __name__ == "__main__":
-#     actor_id = "https://sdlay.netlify.app/user-info/ylay/actor.json"
-#     webfinger = "@ylay@sdlay.netlify.app"
-#     actor_id = "https://mastodon.social/users/pbandj9819"
-#     webfinger = "@pbandj9819@mastodon.social"
-#     handler = PostReplyHandler(actor_id, webfinger, False)
-#     replies = (handler.get_replies())
-#     print(len(replies))

@@ -14,22 +14,11 @@ class ActivityHandler:
         response = self.handler.send_request(activity_dto)
         return self.__interpret_response(activity='Follow', response=response, debug=debug)
 
-    # def send_accept_activity(self, webfinger, debug=True):
-    #     activity_dto = self.generator.generate_accept_activity(self.actor_id, webfinger)
-    #     print(activity_dto.activity)
-        # response = self.handler.send_request(activity_dto)
-        # return self.__interpret_response(activity='Accept', response=response, debug=debug)
-    
     def send_publish_activity(self, post_id, content, public=True, debug=True):
         activity_dto = self.generator.generate_publish_activity(self.actor_id, post_id, content, public)
         responses = self.__share_to_follower(activity_dto)
         return self.__interpret_response(activity='Publish', response=responses, debug=debug)
     
-    # def send_delete_activity(self, post_id, debug=True):
-    #     activity_dto = self.generator.generate_delete_activity(self.actor_id, post_id)
-    #     responses = self.__share_to_follower(activity_dto)
-    #     return self.__interpret_response(activity='Delete', response=responses, debug=debug)
-
     def __share_to_follower(self, activity_dto):
         responses = []
         for follower in activity_dto.followers:

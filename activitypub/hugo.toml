@@ -1,6 +1,6 @@
-baseURL = 'https://example.org/'
+baseURL = 'https://staticap.netlify.app/'
 languageCode = 'en-us'
-title = 'My New Hugo Site'
+title = 'Static ActivityPub'
 
 publishDir = "../docs"
 [markup]

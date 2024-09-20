@@ -13,17 +13,9 @@ class ActivityGenerator:
         template = FollowActivityTemplate(actor_id)
         return template.create(webfinger)
         
-    # def generate_accept_activity(self, actor_id, webfinger):
-    #     template = AcceptActivityTemplate(actor_id)
-    #     return template.create(webfinger)
-      
     def generate_publish_activity(self, actor_id, post_id, content, public):
         template = PublishActivityTemplate(actor_id, post_id, content, public)
         return template.create()
-
-    # def generate_delete_activity(self, actor_id, post_id):
-    #     template = DeleteActivityTemplate(actor_id, post_id)
-    #     return template.create()
 
 class ActivityTemplate:
     def __init__(self, actor_id, follower_url=None):
@@ -79,24 +71,6 @@ class FollowActivityTemplate(ActivityTemplate):
         }
         return activity
 
-# class AcceptActivityTemplate(ActivityTemplate):
-#     def __init__(self, actor_id):
-#         super().__init__(actor_id=actor_id)
-    
-#     def create_json_activity(self, base):
-#         activity = {
-#             "@context": "https://www.w3.org/ns/activitystreams",
-#             "type": "Accept",
-#             "actor": self.actor_id,
-#             "object": { 
-#                "@context": "https://www.w3.org/ns/activitystreams",
-#                 "type": "Follow",
-#                 "actor": base.target_actor_id,
-#                 "object": self.actor_id,
-#             }
-#         }
-#         return activity
-
 class PublishActivityTemplate(ActivityTemplate):
     def __init__(self, actor_id, post_id, content, public):
         self.post_id = post_id
@@ -129,16 +103,3 @@ class PublishActivityTemplate(ActivityTemplate):
             activity['to'].append(public_flag)
         return activity
 
-# class DeleteActivityTemplate(ActivityTemplate):
-#     def __init__(self, actor_id, post_id):
-#         self.post_id = post_id
-#         super().__init__(actor_id, get_follower_url(actor_id))
-        
-#     def create_json_activity(self, base):
-#         activity = {
-#             "@context": "https://www.w3.org/ns/activitystreams",
-#             "type": "Delete",
-#             "actor": self.actor_id,
-#             "object": self.post_id
-#         }
-#         return activity
