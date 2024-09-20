@@ -1,0 +1,9 @@
+{{ $content := .Page.Content }}
+{{ $summaryHeading := "Summary" }}
+{{ $pattern := printf "(?s)# %s\\n\\n(.+?)(\\n\\n#|\\Z)" $summaryHeading }}
+{{ $matches := findRE $pattern $content }}
+{{ if gt (len $matches) 0 }}
+    {{ $summary := index $matches 0 1 | markdownify }}
+    {{ $summary | plainify }} <!-- Ensure plain text output -->
+{{ end }}
+

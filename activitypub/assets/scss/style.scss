@@ -1,0 +1,33 @@
+@import "constants";
+
+* {
+    margin: 0px;
+    min-width: 0px;
+    min-height: 0px;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: $font-stack;
+}
+
+.page-body-container {
+    position: relative;
+    margin: 5%;
+
+    & > * {
+        margin: 20px;
+    }
+
+    .back-btn {
+        display: none;
+    }
+}
+
+li {
+    margin: 10px 0px;
+}
+
+.pre-link {
+    text-decoration: none;
+}

@@ -1,0 +1,7 @@
+@import "constants";
+
+footer {
+    display: flex;
+    background-color: $primary-color;
+    min-height: 300px;
+}

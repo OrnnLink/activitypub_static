@@ -1,0 +1,26 @@
+@import url("https://fonts.googleapis.com/css2?family=Lato");
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk");
+@import url("https://fonts.googleapis.com/css2?family=Roboto");
+@import url("https://fonts.googleapis.com/css2?family=Roboto+Mono");
+* {
+  margin: 0px;
+  min-width: 0px;
+  min-height: 0px;
+  box-sizing: border-box; }
+
+body {
+  font-family: "Lato", "Space Grotesk", "Roboto", "Helvectica", "Arial"; }
+
+.page-body-container {
+  position: relative;
+  margin: 5%; }
+  .page-body-container > * {
+    margin: 20px; }
+  .page-body-container .back-btn {
+    display: none; }
+
+li {
+  margin: 10px 0px; }
+
+.pre-link {
+  text-decoration: none; }

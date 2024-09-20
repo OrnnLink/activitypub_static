@@ -1,0 +1,39 @@
+{{ define "main" }}
+<div class="page-body-container">
+	<h1>{{ .Title }}</h1>
+	<p><em>Published on: {{ .Date }}</em></p>
+	{{ if .Params.prerequisites }}
+		<section>
+			<strong>Pre-requisite: </strong>
+			{{ $count := 0}}
+			{{ $max_len := .Params.prerequisites | len }}
+			{{ $max_len := sub $max_len 1 }}
+			{{ range $key, $value := .Params.prerequisites }}
+				{{ $title := replace $key "_" " " }}
+				<a class="pre-link" href="{{ $value }}" style="text-transform: capitalize;">{{ $title | title }}</a> 
+				{{ if not (eq $count $max_len) }}
+					,
+				{{ end }}
+				{{ $count = add $count 1}}
+			{{ end }}
+		</section>
+	{{ end }}
+	<hr>
+	{{ .Content }}
+	{{ if .Params.seeNext }}
+		<hr>
+		<strong>See Next</strong>
+		<ul>
+		{{ range $key, $value := .Params.seeNext }}
+			{{ $title := replace $key "_" " " }}
+			<li><a class="pre-link" href="{{ $value }}" style="text-transform: capitalize;">{{ $title | title }}</a></li>
+		{{ end }}
+		</ul>
+	{{ end }}
+	<script> 
+		const backToPage = () => {
+			window.location.href = "/page"
+		}
+	</script>
+</div>
+{{ end }}

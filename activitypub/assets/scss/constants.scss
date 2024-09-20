@@ -1,0 +1,17 @@
+@import url("https://fonts.googleapis.com/css2?family=Lato");
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk");
+@import url("https://fonts.googleapis.com/css2?family=Roboto");
+@import url("https://fonts.googleapis.com/css2?family=Roboto+Mono");
+
+$font-stack: "Lato", "Space Grotesk", "Roboto", "Helvectica", "Arial";
+$primary-color: #071952;
+$accent-color: #37b7c3;
+$alt-color: #088395;
+$alt-color2: #ebf4f6;
+$text-color: white;
+
+@mixin flex-box($align-items: center, $justify-content: center) {
+	display: flex; 
+	align-items: $align-items;
+	justify-content: $justify-content;
+}

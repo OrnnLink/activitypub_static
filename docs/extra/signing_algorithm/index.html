@@ -1,0 +1,229 @@
+<!doctype html>
+<html>
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+        <title>Signing Algorithm</title>
+           
+        <link rel="stylesheet" href="/scss/style.css" />
+          
+        <link rel="stylesheet" href="/scss/header.css" />
+          
+        <link rel="stylesheet" href="/scss/footer.css" />
+          
+        <link rel="stylesheet" href="/scss/list.css" />
+          
+        <link rel="stylesheet" href="/scss/shortcodes.css" />
+        
+    </head>
+    <body>
+        <header>
+    <nav class="navbar">
+        <h1>Signing Algorithm</h1>
+    </nav>
+</header>
+ 
+        
+<div class="page-body-container">
+	<h1>Signing Algorithm</h1>
+	<p><em>Published on: 2024-07-19 14:18:17 &#43;1000 AEST</em></p>
+	
+	<hr>
+	<h2 id="Signing">Signing Algorithm</h2>
+<p>We will be implementing our private key signing algorithm using Python algorithm, it is recommended that you install the following python libraries on your machine or python environment:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>pip install cryptography
+</span></span><span style="display:flex;"><span>pip install requests
+</span></span></code></pre></div>
+<div class="callout note">
+  <h4>Note</h4>
+  <p>
+Different ActivityPub platforms requires different levels of security for signature. The algorithm we used for this section have only been tested on Mastodon, Honk and Ktistec. It works successfully for both Mastodon and Honk, but Ktistec requires additional security that I haven't quite figured out yet due to resource constraint.
+</p>
+</div>
+
+<p>Here is the code for algorithm used for private key signing</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#080;font-weight:bold">import</span> <span style="color:#b06;font-weight:bold">requests</span>
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">import</span> <span style="color:#b06;font-weight:bold">json</span>
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">import</span> <span style="color:#b06;font-weight:bold">hashlib</span>
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">import</span> <span style="color:#b06;font-weight:bold">base64</span>
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">import</span> <span style="color:#b06;font-weight:bold">datetime</span>
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">from</span> <span style="color:#b06;font-weight:bold">cryptography.hazmat.primitives</span> <span style="color:#080;font-weight:bold">import</span> hashes
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">from</span> <span style="color:#b06;font-weight:bold">cryptography.hazmat.primitives.asymmetric</span> <span style="color:#080;font-weight:bold">import</span> padding
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">from</span> <span style="color:#b06;font-weight:bold">cryptography.hazmat.primitives.serialization</span> <span style="color:#080;font-weight:bold">import</span> load_pem_private_key
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">class</span> <span style="color:#b06;font-weight:bold">KeySigningHandler</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> __init__(self, actorId, privateKeyPath):
+</span></span><span style="display:flex;"><span>        self.actorId = actorId 
+</span></span><span style="display:flex;"><span>        self.__initFollowUrl()
+</span></span><span style="display:flex;"><span>        self.privateKeyPath = privateKeyPath
+</span></span><span style="display:flex;"><span>        self.privateKey = self.__loadPrivateKey(privateKeyPath)
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">setPrivateKey</span>(self, privateKeyPath: <span style="color:#038">str</span>):
+</span></span><span style="display:flex;"><span>        self.privateKeyPath = privateKeyPath
+</span></span><span style="display:flex;"><span>        self.privateKey = self.__loadPrivateKey(privateKeyPath)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">setActorId</span>(self, actorId):
+</span></span><span style="display:flex;"><span>        self.actorId = actorId 
+</span></span><span style="display:flex;"><span>        self.__initFollowUrl()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">__initFollowUrl</span>(self):
+</span></span><span style="display:flex;"><span>        cursor = actorId.split(<span style="color:#d20;background-color:#fff0f0">&#34;/&#34;</span>)
+</span></span><span style="display:flex;"><span>        self.followerUrl = <span style="color:#d20;background-color:#fff0f0">&#34;/&#34;</span>.join(cursor[:<span style="color:#038">len</span>(cursor)-<span style="color:#00d;font-weight:bold">1</span>]) + <span style="color:#d20;background-color:#fff0f0">&#34;followers&#34;</span>
+</span></span><span style="display:flex;"><span>        self.followingUrl = <span style="color:#d20;background-color:#fff0f0">&#34;/&#34;</span>.join(cursor[:<span style="color:#038">len</span>(cursor)-<span style="color:#00d;font-weight:bold">1</span>]) + <span style="color:#d20;background-color:#fff0f0">&#34;following&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">__generateDigest</span>(self, activity: <span style="color:#038">str</span>) -&gt; <span style="color:#038">str</span>:
+</span></span><span style="display:flex;"><span>        sha256 = hashlib.sha256()
+</span></span><span style="display:flex;"><span>        sha256.update(activity.encode(<span style="color:#d20;background-color:#fff0f0">&#39;utf-8&#39;</span>))
+</span></span><span style="display:flex;"><span>        digest = base64.b64encode(sha256.digest()).decode(<span style="color:#d20;background-color:#fff0f0">&#39;utf-8&#39;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> <span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#34;SHA-256=</span><span style="color:#33b;background-color:#fff0f0">{</span>digest<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">__loadPrivateKey</span>(self, filePath: <span style="color:#038">str</span>):
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">with</span> <span style="color:#038">open</span>(filePath, <span style="color:#d20;background-color:#fff0f0">&#34;rb&#34;</span>) <span style="color:#080;font-weight:bold">as</span> key_file:
+</span></span><span style="display:flex;"><span>            private_key = load_pem_private_key(key_file.read(), password=<span style="color:#080;font-weight:bold">None</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> private_key
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">__getActorObjUrl</span>(self, username: <span style="color:#038">str</span>, domain: <span style="color:#038">str</span>) -&gt; <span style="color:#038">str</span>:
+</span></span><span style="display:flex;"><span>        url = <span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#34;https://</span><span style="color:#33b;background-color:#fff0f0">{</span>domain<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">/.well-known/webfinger&#34;</span>
+</span></span><span style="display:flex;"><span>        params = { <span style="color:#d20;background-color:#fff0f0">&#34;resource&#34;</span>: <span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#34;acct:</span><span style="color:#33b;background-color:#fff0f0">{</span>username<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">@</span><span style="color:#33b;background-color:#fff0f0">{</span>domain<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">&#34;</span>}
+</span></span><span style="display:flex;"><span>        response = requests.get(url, params=params)
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">if</span> response.ok:
+</span></span><span style="display:flex;"><span>            data = response.json()
+</span></span><span style="display:flex;"><span>            links = data.get(<span style="color:#d20;background-color:#fff0f0">&#34;links&#34;</span>, [])
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">for</span> link <span style="color:#080">in</span> links:
+</span></span><span style="display:flex;"><span>                <span style="color:#080;font-weight:bold">if</span> link.get(<span style="color:#d20;background-color:#fff0f0">&#34;rel&#34;</span>) == <span style="color:#d20;background-color:#fff0f0">&#34;self&#34;</span>:
+</span></span><span style="display:flex;"><span>                    <span style="color:#080;font-weight:bold">return</span> link.get(<span style="color:#d20;background-color:#fff0f0">&#34;href&#34;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> <span style="color:#080;font-weight:bold">None</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">__getActorInboxUrl</span>(self, actor_obj_url: <span style="color:#038">str</span>) -&gt; <span style="color:#038">str</span>:
+</span></span><span style="display:flex;"><span>        headers = { <span style="color:#d20;background-color:#fff0f0">&#34;Accept&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;application/activity+json&#34;</span>}
+</span></span><span style="display:flex;"><span>        response = requests.get(actor_obj_url, headers=headers)
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">if</span> response.ok:
+</span></span><span style="display:flex;"><span>            data = response.json()
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">return</span> data.get(<span style="color:#d20;background-color:#fff0f0">&#39;inbox&#39;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> <span style="color:#080;font-weight:bold">None</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">__gatherActorComponents</span>(self, webfinger: <span style="color:#038">str</span>):
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">try</span>:
+</span></span><span style="display:flex;"><span>            username, domain = webfinger.split(<span style="color:#d20;background-color:#fff0f0">&#34;@&#34;</span>)[<span style="color:#00d;font-weight:bold">1</span>:]
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">except</span> <span style="color:#b06;font-weight:bold">ValueError</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">return</span> <span style="color:#d20;background-color:#fff0f0">&#34;Invalid Webfinger&#34;</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        actorObjUrl = self.__getActorObjUrl(username, domain)
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">if</span> <span style="color:#080">not</span> actorObjUrl:
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">return</span> <span style="color:#d20;background-color:#fff0f0">&#34;Invalid Webfinger&#34;</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        actorInboxUrl = self.__getActorInboxUrl(actorObjUrl)
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">if</span> <span style="color:#080">not</span> actorInboxUrl:
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">return</span> <span style="color:#d20;background-color:#fff0f0">&#34;Invalid Actor Object URL&#34;</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        inboxEndpoint = actorInboxUrl.split(<span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#34;https://</span><span style="color:#33b;background-color:#fff0f0">{</span>domain<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">&#34;</span>)[<span style="color:#00d;font-weight:bold">1</span>]
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> domain, actorObjUrl, actorInboxUrl, inboxEndpoint
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">__generateSignature</span>(
+</span></span><span style="display:flex;"><span>        self, date: <span style="color:#038">str</span>, digest: <span style="color:#038">str</span>,
+</span></span><span style="display:flex;"><span>        activity: <span style="color:#038">dict</span>, 
+</span></span><span style="display:flex;"><span>        host: <span style="color:#038">str</span>,
+</span></span><span style="display:flex;"><span>        inboxEndpoint: <span style="color:#038">str</span>
+</span></span><span style="display:flex;"><span>    ) -&gt; <span style="color:#038">str</span>:
+</span></span><span style="display:flex;"><span>        activity_json = json.dumps(activity)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        sign_string = <span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#34;(request-target): post </span><span style="color:#33b;background-color:#fff0f0">{</span>inboxEndpoint<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#04d;background-color:#fff0f0">\n</span><span style="color:#d20;background-color:#fff0f0">&#34;</span>
+</span></span><span style="display:flex;"><span>        sign_string += <span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#34;host: </span><span style="color:#33b;background-color:#fff0f0">{</span>host<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#04d;background-color:#fff0f0">\n</span><span style="color:#d20;background-color:#fff0f0">&#34;</span>
+</span></span><span style="display:flex;"><span>        sign_string += <span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#34;date: </span><span style="color:#33b;background-color:#fff0f0">{</span>date<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#04d;background-color:#fff0f0">\n</span><span style="color:#d20;background-color:#fff0f0">&#34;</span>
+</span></span><span style="display:flex;"><span>        sign_string += <span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#34;digest: </span><span style="color:#33b;background-color:#fff0f0">{</span>digest<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        signature = self.privateKey.sign(
+</span></span><span style="display:flex;"><span>            sign_string.encode(<span style="color:#d20;background-color:#fff0f0">&#34;utf-8&#34;</span>),
+</span></span><span style="display:flex;"><span>            padding.PKCS1v15(),
+</span></span><span style="display:flex;"><span>            hashes.SHA256()
+</span></span><span style="display:flex;"><span>        )
+</span></span><span style="display:flex;"><span>        signature_b64 = base64.b64encode(signature).decode(<span style="color:#d20;background-color:#fff0f0">&#34;utf-8&#34;</span>)
+</span></span><span style="display:flex;"><span>        key_id = <span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#34;</span><span style="color:#33b;background-color:#fff0f0">{</span>self.actorId<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">#main-key&#34;</span>
+</span></span><span style="display:flex;"><span>        signature_header = (
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#39;keyId=&#34;</span><span style="color:#33b;background-color:#fff0f0">{</span>key_id<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">&#34;,&#39;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#39;headers=&#34;(request-target) host date digest&#34;,&#39;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#39;signature=&#34;</span><span style="color:#33b;background-color:#fff0f0">{</span>signature_b64<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">&#34;,&#39;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#39;algorithm=&#34;rsa-sha256&#34;&#39;</span>
+</span></span><span style="display:flex;"><span>        )
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> signature_header
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">generateSignedHeaders</span>(self, activity: <span style="color:#038">dict</span>, targetWebfinger: <span style="color:#038">str</span>) -&gt; <span style="color:#038">dict</span>:
+</span></span><span style="display:flex;"><span>        result = self.__gatherActorComponents(targetWebfinger)
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">if</span> <span style="color:#038">isinstance</span>(result, <span style="color:#038">str</span>):
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">return</span> {<span style="color:#d20;background-color:#fff0f0">&#34;error&#34;</span>: result}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        domain, actorObjUrl, actorInboxUrl, inboxEndpoint = result
+</span></span><span style="display:flex;"><span>        date = datetime.datetime.utcnow().strftime(<span style="color:#d20;background-color:#fff0f0">&#39;</span><span style="color:#33b;background-color:#fff0f0">%a</span><span style="color:#d20;background-color:#fff0f0">, </span><span style="color:#33b;background-color:#fff0f0">%d</span><span style="color:#d20;background-color:#fff0f0"> %b %Y %H:%M:%S GMT&#39;</span>)
+</span></span><span style="display:flex;"><span>        activity_json = json.dumps(activity)
+</span></span><span style="display:flex;"><span>        digest = self.__generateDigest(activity_json)
+</span></span><span style="display:flex;"><span>        signature = self.__generateSignature(date, digest, activity, domain, inboxEndpoint)
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        headers = {
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;Host&#34;</span>: domain,
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;Date&#34;</span>: date,
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;Digest&#34;</span>: digest,
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;Content-Type&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;application/activity+json&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;Signature&#34;</span>: signature
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;inbox_url&#34;</span>: actorInboxUrl,
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;body&#34;</span>: activity_json,
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;headers&#34;</span>: headers
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">generateFollowActivity</span>(self, targetWebfinger):
+</span></span><span style="display:flex;"><span>        username, domain = targetWebfinger.split(<span style="color:#d20;background-color:#fff0f0">&#34;@&#34;</span>)[<span style="color:#00d;font-weight:bold">1</span>:]
+</span></span><span style="display:flex;"><span>        actorObjUrl = self.__getActorObjUrl(username, domain)
+</span></span><span style="display:flex;"><span>        activity = {
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;@context&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;https://www.w3.org/ns/activitystreams&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;type&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;Follow&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;actor&#34;</span>: self.actorId,
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;object&#34;</span>: actorObjUrl
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> activity
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">generatePostActivity</span>(self, postId, content, public=<span style="color:#080;font-weight:bold">True</span>):
+</span></span><span style="display:flex;"><span>        date = datetime.datetime.utcnow().strftime(<span style="color:#d20;background-color:#fff0f0">&#39;</span><span style="color:#33b;background-color:#fff0f0">%a</span><span style="color:#d20;background-color:#fff0f0">, </span><span style="color:#33b;background-color:#fff0f0">%d</span><span style="color:#d20;background-color:#fff0f0"> %b %Y %H:%M:%S GMT&#39;</span>)
+</span></span><span style="display:flex;"><span>        activity = {
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;@context&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;https://www.w3.org/ns/activitystreams&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;type&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;Create&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;id&#34;</span>: postId,
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;actor&#34;</span>: self.actorId,
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;object&#34;</span>: {
+</span></span><span style="display:flex;"><span>                <span style="color:#d20;background-color:#fff0f0">&#34;id&#34;</span>: postId,
+</span></span><span style="display:flex;"><span>                <span style="color:#d20;background-color:#fff0f0">&#34;type&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;Note&#34;</span>, 
+</span></span><span style="display:flex;"><span>                <span style="color:#d20;background-color:#fff0f0">&#34;published&#34;</span>: date,
+</span></span><span style="display:flex;"><span>                <span style="color:#d20;background-color:#fff0f0">&#34;content&#34;</span>: content,
+</span></span><span style="display:flex;"><span>                <span style="color:#d20;background-color:#fff0f0">&#34;attributedTo&#34;</span>: self.actorId,
+</span></span><span style="display:flex;"><span>                <span style="color:#d20;background-color:#fff0f0">&#34;to&#34;</span>: [ self.followerUrl ],
+</span></span><span style="display:flex;"><span>                <span style="color:#d20;background-color:#fff0f0">&#34;cc&#34;</span>: [ self.followerUrl]
+</span></span><span style="display:flex;"><span>            },
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;to&#34;</span>: [ self.followerUrl ],
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;cc&#34;</span>: [ self.followerUrl]
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">if</span> public:
+</span></span><span style="display:flex;"><span>            publicFlag = <span style="color:#d20;background-color:#fff0f0">&#34;https://www.w3.org/ns/activitystreams#Public&#34;</span>
+</span></span><span style="display:flex;"><span>            activity[<span style="color:#d20;background-color:#fff0f0">&#34;object&#34;</span>][<span style="color:#d20;background-color:#fff0f0">&#39;to&#39;</span>].append(publicFlag)
+</span></span><span style="display:flex;"><span>            activity[<span style="color:#d20;background-color:#fff0f0">&#39;to&#39;</span>].append(publicFlag)
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> activity
+</span></span></code></pre></div>
+	
+		<hr>
+		<strong>See Next</strong>
+		<ul>
+		
+			
+			<li><a class="pre-link" href="/extra/signing_algorithm_refactor" style="text-transform: capitalize;">Signing Algorithm Refactor</a></li>
+		
+		</ul>
+	
+	<script> 
+		const backToPage = () => {
+			window.location.href = "/page"
+		}
+	</script>
+</div>
+ 
+        
+    </body>
+</html>

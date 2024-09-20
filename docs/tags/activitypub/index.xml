@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>ActivityPub on My New Hugo Site</title>
+    <link>http://localhost:1313/tags/activitypub/</link>
+    <description>Recent content in ActivityPub on My New Hugo Site</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 19 Jul 2024 13:49:52 +1000</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/activitypub/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Implementing Post</title>
+      <link>http://localhost:1313/page/implementing_post/</link>
+      <pubDate>Fri, 19 Jul 2024 13:49:52 +1000</pubDate>
+      <guid>http://localhost:1313/page/implementing_post/</guid>
+      <description>Following up on &amp;ldquo;Implementing Follow&amp;rdquo;, this article offers and extension for implementing a post publishing feature, that allows you to share contents with a list of your following users on different ActivityPub instances</description>
+    </item>
+    <item>
+      <title>Implementing Follow</title>
+      <link>http://localhost:1313/page/implementing_follow/</link>
+      <pubDate>Fri, 19 Jul 2024 13:49:43 +1000</pubDate>
+      <guid>http://localhost:1313/page/implementing_follow/</guid>
+      <description>Following up on &amp;ldquo;Webfinger for Discovery&amp;rdquo;, this article offers an extension to implementing a following feature, where a user from your static site can send a follow request to other users on various ActivityPub instances, such that you can share your contents to those you are followings.</description>
+    </item>
+    <item>
+      <title>Webfinger For Discovery</title>
+      <link>http://localhost:1313/page/webfinger_for_discovery/</link>
+      <pubDate>Thu, 18 Jul 2024 14:11:45 +1000</pubDate>
+      <guid>http://localhost:1313/page/webfinger_for_discovery/</guid>
+      <description>This article contains information about the fundamental of webfinger, and how to setup your webfinger and actor object on your static site, such that they can be discovered by other ActivityPub instances.</description>
+    </item>
+  </channel>
+</rss>

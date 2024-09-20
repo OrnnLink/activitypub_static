@@ -1,0 +1,11 @@
+@import "constants";
+
+.navbar {
+    background-color: $primary-color;
+    color: white;
+    padding: 20px;
+
+    h1 {
+        text-transform: uppercase;
+    }
+}
