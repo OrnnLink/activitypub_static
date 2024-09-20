@@ -33,7 +33,7 @@ class WebfingerHandler:
                     "type": "application/activity+json"
                 },
             ],
-            "subject": f"acct:{username}@{domain}"
+            "subject": f"acct:{self.username}@{self.domain}"
         }
         filename = f"{self.static_dir_path}/.well-known/webfinger"
         self.__write_json(filename, template)
@@ -71,13 +71,13 @@ class WebfingerHandler:
                 "publicKeyPem": f"{publicKey}"
             }
         }
-        filename = f"{self.static_dir_path}/{username}/user-info/actor.json"
+        filename = f"{self.static_dir_path}/{self.username}/user-info/actor.json"
         self.__write_json(filename, template)
         self.__make_actor_info_files(actor_id)
                         
     def __make_actor_json_files(self):
         # makes the username file
-        dirname = f"{self.static_dir_path}/{username}"
+        dirname = f"{self.static_dir_path}/{self.username}"
         if not os.path.isdir(dirname): 
             os.makedirs(dirname)
             os.makedirs(f"{dirname}/user-info")
@@ -116,7 +116,3 @@ class WebfingerHandler:
             self.__write_json(f"{filename}/first.json", template)
        
         
-username = "noah"
-domain = "staticap.netlify.app"
-handler = WebfingerHandler(username, domain, "public_key.pem")
-handler.create_user()
