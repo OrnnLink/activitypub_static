@@ -8,28 +8,26 @@ class ActivityTemplate:
         self.actor_id = actor_id
         self.follower_url = follower_url
         self.__init_info_retriever()
-    
-    def set_webfinger(self, webfinger=None):
-        self.webfinger = webfinger
         
-    def create(self):
-        base = self.__get_base_activity()
-        base.activity = self.create_json_activity(base)
-        base.followers = extract_followers_inbox(self.follower_url)
+    def create(self, data: dict):
+        base = self.__get_base_activity(data)
+        base.activity = self.create_json_activity(base, data)
+        if "webfinger" not in data.keys():
+            base.followers = extract_followers_inbox(self.follower_url)
         return base
 
-    def create_json_activity(self, base):
+    def create_json_activity(self, base, data: dict={}):
         return {}
     
     def __init_info_retriever(self):
         self.retriever = ActorIdRetriever()
         self.retriever.set_next(ActorInboxRetriever())
 
-    def __get_base_activity(self):
-        if self.webfinger == None: 
+    def __get_base_activity(self, data: dict):
+        if "webfinger" not in data.keys():
             return ActivityDTO()
         
-        username, domain = extract_username_and_domain(self.webfinger)
+        username, domain = extract_username_and_domain(data['webfinger'])
         target_info = self.retriever.get_info([username, domain])
         if len(target_info) != 2:
             return target_info
