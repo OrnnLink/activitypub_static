@@ -1,10 +1,20 @@
 class ActivityDTO:
-    def __init__(self, domain="", actor_id="", inbox_url ="", activity=""):
+    def __init__(self,
+            domain="", actor_id="", inbox_url ="", activity="",
+            webfinger=None, target_id="", follower_url="",
+            post_id="", content="", public=False
+        ):
         self.domain = domain
         self.actor_id = actor_id
         self.inbox_url = inbox_url
         self.activity = activity
-    
+        self.webfinger = webfinger
+        self.target_id = target_id
+        self.follower_url = follower_url
+        self.post_id = post_id 
+        self.content = content
+        self.public = public
+
     def get_inbox_endpoint(self):
         inbox_endpoint = self.inbox_url.split("/")[3:]
         return "/" + "/".join(inbox_endpoint)

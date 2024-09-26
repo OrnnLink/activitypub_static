@@ -7,6 +7,9 @@ def send_get_request(url, headers={}, params={}):
         headers = { "accept": "application/activity+json"}
     return requests.get(url, headers=headers, params=params)
 
+def send_post_request(url, headers, activity):
+    return requests.post(url, headers=headers, data=activity)
+
 def extract_username_and_domain(webfinger):
     return webfinger.split("@")[1:]
 
@@ -49,6 +52,8 @@ def __get_follower_id_from_ext_url(data):
     
     total = None
     follower_ids = [] 
+    print(urls)
+    return
     while True:
         url = urls.pop(0)
         response = requests.get(url, headers={ "accept": "application/activity+json"})

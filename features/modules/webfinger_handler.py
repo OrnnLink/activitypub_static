@@ -108,7 +108,7 @@ class WebfingerHandler:
                 "id": f"{actor_id}/{name}.json",
                 "type": "OrderedCollection",
                 "totalItems": 0,
-                "first": f"f{actor_id}/{name}/first.json"
+                "first": f"{actor_id}/{name}/first.json"
             }
             filename = f"{self.static_dir_path}/{self.username}/user-info/{name}"
             self.__write_json(f"{filename}.json", template)

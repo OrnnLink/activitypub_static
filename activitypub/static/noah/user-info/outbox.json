@@ -3,5 +3,5 @@
  "id": "https://staticap.netlify.app/noah/user-info/outbox.json",
  "type": "OrderedCollection",
  "totalItems": 1,
- "first": "fhttps://staticap.netlify.app/noah/user-info/outbox/first.json"
+ "first": "https://staticap.netlify.app/noah/user-info/outbox/first.json"
 }
