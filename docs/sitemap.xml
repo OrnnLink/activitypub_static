@@ -3,12 +3,15 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>http://localhost:1313/page/</loc>
-    <lastmod>2024-08-09T09:50:42+10:00</lastmod>
+    <lastmod>2024-09-20T16:30:18+10:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/page/running_activitypub_server_leveraging_static_web_hosting/</loc>
-    <lastmod>2024-08-09T09:50:42+10:00</lastmod>
+    <loc>http://localhost:1313/page/spring/</loc>
+    <lastmod>2024-09-20T16:30:18+10:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/</loc>
+    <lastmod>2024-09-20T16:30:18+10:00</lastmod>
+  </url><url>
+    <loc>http://localhost:1313/page/running_activitypub_server_leveraging_static_web_hosting/</loc>
     <lastmod>2024-08-09T09:50:42+10:00</lastmod>
   </url><url>
     <loc>http://localhost:1313/extra/</loc>
