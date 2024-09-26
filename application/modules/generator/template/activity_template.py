@@ -1,4 +1,4 @@
-from modules.utility import extract_username_and_domain
+from modules.utility import extract_username_and_domain, extract_followers_inbox
 from modules.dto.activity_dto import ActivityDTO
 from modules.retriever.actor_id_retriever import ActorIdRetriever
 from modules.retriever.actor_inbox_retriever import ActorInboxRetriever
@@ -14,13 +14,16 @@ class ActivityTemplate:
         
     def create(self):
         base = self.__get_base_activity()
-        print(base)
-        ...
+        base.activity = self.create_json_activity(base)
+        base.followers = extract_followers_inbox(self.follower_url)
+        return base
+
+    def create_json_activity(self, base):
+        return {}
     
     def __init_info_retriever(self):
         self.retriever = ActorIdRetriever()
         self.retriever.set_next(ActorInboxRetriever())
-        ...
 
     def __get_base_activity(self):
         if self.webfinger == None: 
