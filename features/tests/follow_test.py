@@ -5,11 +5,8 @@ from modules.activity_handler import *
 class FollowTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.username = "noah"
-        cls.domain = "staticap.netlify.app"
-        cls.actor_id = f"https://{cls.domain}/{cls.username}/user-info/actor.json" 
-        cls.private_key_path = "private_key.pem"
-        cls.handler = ActivityHandler(cls.actor_id, cls.private_key_path)
+        cls.handler = ActivityHandler()
+        cls.actor_id = cls.handler.actor_id
         
     # def test_follow_non_existing_honk_user(self):
     #     webfinger = "@noah1@daniellay.cc"

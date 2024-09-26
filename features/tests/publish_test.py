@@ -5,11 +5,10 @@ from modules.activity_handler import ActivityHandler
 class PublishTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        cls.actor_id = "https://sdlay.netlify.app/user-info/ylay/actor.json" 
-        cls.private_key_path = "private_key.pem"
         cls.handler = ActivityHandler(cls.actor_id, cls.private_key_path)
+        cls.actor_id = cls.handler.actor_id
         cls.data = {
-            "post_id": "https://sdlay.netlify.app/post-json/spring.json",
+            "post_id": f"https://{self.handler.domain}/{self.handler.username}/post-json/spring.json",
             "content": "<p>Spring is coming</p>",
             "public": True
         }

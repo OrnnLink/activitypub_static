@@ -2,13 +2,19 @@ import json
 import os
 
 class WebfingerHandler:
-    def __init__(self, username: str, domain: str="", publicKeyPath=""):
-        self.username = username
-        self.domain = "staticap.netlify.app" if domain == "" else domain 
-        self.publicKeyPath = publicKeyPath
-        self.site_dir_path =  '../activitypub'
-        self.static_dir_path = f'{self.site_dir_path}/static'
-        
+    def __init__(self):
+        self.__load_config()
+
+    def __load_config(self):
+        filename = "config.json"
+        with open(filename, "r") as fd:
+            data = json.load(fd)
+
+        self.username = data['username']
+        self.domain = data['domain']
+        self.public_key_path = data['public_key_path']
+        self.set_site_dir_path(data['site_dir_path'])
+
     def set_site_dir_path(self, path: str):
         self.site_dir_path = path
         self.static_dir_path = f'{self.site_dir_path}/static'
@@ -47,7 +53,7 @@ class WebfingerHandler:
     def make_actor_object(self):
         self.__make_actor_json_files()
         actor_id = f"https://{self.domain}/{self.username}/user-info"
-        publicKey = "\n".join([line.strip() for line in open(self.publicKeyPath, "r")])
+        publicKey = "\n".join([line.strip() for line in open(self.public_key_path, "r")])
         template = {
             "@context": [
                 "https://www.w3.org/ns/activitystreams",
@@ -81,6 +87,7 @@ class WebfingerHandler:
         if not os.path.isdir(dirname): 
             os.makedirs(dirname)
             os.makedirs(f"{dirname}/user-info")
+            os.makedirs(f"{dirname}/content")
         
         dirname += "/user-info"
         filenames = [ "actor", "outbox", "inbox", "followers", "following" ]

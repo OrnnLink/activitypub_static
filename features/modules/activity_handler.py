@@ -1,12 +1,22 @@
+import json
 from modules.activity_request import *
 from modules.activity_generator import ActivityGenerator
 
 class ActivityHandler: 
-    def __init__(self, actor_id, private_key_path):
-        self.actor_id = actor_id
+    def __init__(self):
+        self.__load_config()
+
+    def __load_config(self):
+        filename = "config.json"
+        with open(filename, "r") as fd:
+            data = json.load(fd)
+        self.username = data['username']
+        self.domain= data['domain']
+        private_key_path = data["private_key_path"]
+        self.actor_id = f"https://{self.domain}/{self.username}/user-info/actor.json"
         self.generator = ActivityGenerator.get_instance()
-        self.handler = ActivityPubRequestHandler(actor_id, private_key_path)
-        
+        self.handler = ActivityPubRequestHandler(self.actor_id, private_key_path)
+
     def send_follow_activity(self, webfinger, debug=True):
         activity_dto = self.generator.generate_follow_activity(self.actor_id, webfinger)
         if isinstance(activity_dto, list):

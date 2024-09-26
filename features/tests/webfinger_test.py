@@ -8,10 +8,10 @@ from modules.webfinger_handler import *
 class StaticSiteWebfingerTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.username = 'noah'
-        cls.domain = "staticap.netlify.app"
-        cls.publicKeyPath = "public_key.pem"
-        cls.handler = WebfingerHandler(cls.username, cls.domain, cls.publicKeyPath)
+        cls.handler = WebfingerHandler()
+        cls.username = cls.handler.username
+        cls.domain = cls.handler.domain
+        cls.public_key_path = cls.handler.public_key_path
         cls.handler.set_site_dir_path(".")
         os.makedirs("static")
         ... 
@@ -57,66 +57,66 @@ class StaticSiteWebfingerTest(unittest.TestCase):
                 continue
             self.__verify_body_object(values, actual[key])
     
-    # def test_actor_object_retrieval(self):
-    #     url = f'https://{self.domain}/{self.username}/user-info/actor.json'
-    #     actor_id = f"https://{self.domain}/{self.username}/user-info"
-    #     publicKey = "\n".join([line.strip() for line in open(self.publicKeyPath, "r")])
-    #     headers = {
-    #         "accept": f"application/activity+json"
-    #     }
-    #     response = requests.get(url, headers=headers)
-    #     expected =  {
-    #          "@context": [
-    #             "https://www.w3.org/ns/activitystreams",
-    #         ],
-    #         "endpoints": {
-    #             "sharedInbox": f"{actor_id}/inbox.json"
-    #         },
-    #         "id": f"{actor_id}/actor.json",
-    #         "type": "Person",
-    #         "preferredUsername": f"{self.username}",
-    #         "name": f"{self.username}",
-    #         "inbox": f"{actor_id}/inbox.json",
-    #         "outbox": f"{actor_id}/outbox.json",
-    #         "followers": f"{actor_id}/followers.json",
-    #         "following": f"{actor_id}/following.json",
-    #         "publicKey": {
-    #             "@context": "https://w3id.org/security/v1",
-    #             "@type": "key",
-    #             "id": f"{actor_id}/actor.json#main-key",
-    #             "owner": f"{actor_id}/actor.json",
-    #             "publicKeyPem": f"{publicKey}"
-    #         }
-    #     }
-    #     self.assertTrue(response.status_code >= 200 and response.status_code < 300)
-    #     self.__verify_body_object(expected, json.loads(response.text))
+    def test_actor_object_retrieval(self):
+        url = f'https://{self.domain}/{self.username}/user-info/actor.json'
+        actor_id = f"https://{self.domain}/{self.username}/user-info"
+        publicKey = "\n".join([line.strip() for line in open(self.public_key_path, "r")])
+        headers = {
+            "accept": f"application/activity+json"
+        }
+        response = requests.get(url, headers=headers)
+        expected =  {
+             "@context": [
+                "https://www.w3.org/ns/activitystreams",
+            ],
+            "endpoints": {
+                "sharedInbox": f"{actor_id}/inbox.json"
+            },
+            "id": f"{actor_id}/actor.json",
+            "type": "Person",
+            "preferredUsername": f"{self.username}",
+            "name": f"{self.username}",
+            "inbox": f"{actor_id}/inbox.json",
+            "outbox": f"{actor_id}/outbox.json",
+            "followers": f"{actor_id}/followers.json",
+            "following": f"{actor_id}/following.json",
+            "publicKey": {
+                "@context": "https://w3id.org/security/v1",
+                "@type": "key",
+                "id": f"{actor_id}/actor.json#main-key",
+                "owner": f"{actor_id}/actor.json",
+                "publicKeyPem": f"{publicKey}"
+            }
+        }
+        self.assertTrue(response.status_code >= 200 and response.status_code < 300)
+        self.__verify_body_object(expected, json.loads(response.text))
     
-    # def test_support_object_retrieval(self):
-    #     actor_id = f"https://{self.domain}/{self.username}/user-info"
-    #     names = [ "outbox", "inbox", "followers", "following"]
-    #     for name in names:
-    #         url = f"{actor_id}/{name}.json"
-    #         response = requests.get(url)
-    #         expected = {
-    #             "@context": "https://www.w3.org/ns/activitystreams",
-    #             "id": f"{actor_id}/{name}.json",
-    #             "type": "OrderedCollection",
-    #             "totalItems": 0,
-    #             "first": f"f{actor_id}/{name}/first.json"
-    #         }
-    #         self.assertTrue(response.status_code >= 200 and response.status_code < 300)
-    #         self.__verify_body_object(expected, json.loads(response.text))
-    #         url = f"{actor_id}/{name}/first.json"
-    #         response = requests.get(url)
-    #         expected = {
-    #             "@context": "https://www.w3.org/ns/activitystreams",
-    #             "id": f"{actor_id}/{name}/first.json",
-    #             "partOf": f"{actor_id}/{name}.json",
-    #             "type": "OrderedCollectionPage",
-    #             "orderedItems": []
-    #         }
-    #         self.assertTrue(response.status_code >= 200 and response.status_code < 300)
-    #         self.__verify_body_object(expected, json.loads(response.text))
+    def test_support_object_retrieval(self):
+        actor_id = f"https://{self.domain}/{self.username}/user-info"
+        names = [ "outbox", "inbox", "followers", "following"]
+        for name in names:
+            url = f"{actor_id}/{name}.json"
+            response = requests.get(url)
+            expected = {
+                "@context": "https://www.w3.org/ns/activitystreams",
+                "id": f"{actor_id}/{name}.json",
+                "type": "OrderedCollection",
+                "totalItems": 0,
+                "first": f"f{actor_id}/{name}/first.json"
+            }
+            self.assertTrue(response.status_code >= 200 and response.status_code < 300)
+            self.__verify_body_object(expected, json.loads(response.text))
+            url = f"{actor_id}/{name}/first.json"
+            response = requests.get(url)
+            expected = {
+                "@context": "https://www.w3.org/ns/activitystreams",
+                "id": f"{actor_id}/{name}/first.json",
+                "partOf": f"{actor_id}/{name}.json",
+                "type": "OrderedCollectionPage",
+                "orderedItems": []
+            }
+            self.assertTrue(response.status_code >= 200 and response.status_code < 300)
+            self.__verify_body_object(expected, json.loads(response.text))
 
     def __verify_file_structure_exists(self, username):
         self.assertTrue(os.path.isdir(f"static/{username}"))
@@ -135,7 +135,7 @@ class StaticSiteWebfingerTest(unittest.TestCase):
 
     def __verify_actor_object_format(self, username, domain):
         actor_id = f"https://{domain}/{username}/user-info"
-        publicKey = "\n".join([line.strip() for line in open(self.publicKeyPath, "r")])
+        publicKey = "\n".join([line.strip() for line in open(self.public_key_path, "r")])
         expected =  {
              "@context": [
                 "https://www.w3.org/ns/activitystreams",
