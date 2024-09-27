@@ -7,10 +7,10 @@
   {
    "@context": "https://www.w3.org/ns/activitystreams",
    "type": "Create",
-   "id": "../activitypub/static/noah/content/page/spring.json",
+   "id": "https://staticap.netlify.app/noah/content/page/spring.json",
    "actor": "https://staticap.netlify.app/noah/user-info/actor.json",
    "object": {
-    "id": "../activitypub/static/noah/content/page/spring.json",
+    "id": "https://staticap.netlify.app/noah/content/page/spring.json",
     "type": "Note",
     "published": "Fri, 20 Sep 2024 06:30:18 GMT",
     "content": "<p>Spring is coming</p>",

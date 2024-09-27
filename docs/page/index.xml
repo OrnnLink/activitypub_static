@@ -2,38 +2,45 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Pages on Static ActivityPub</title>
-    <link>http://localhost:1313/page/</link>
+    <link>https://staticap.netlify.app/page/</link>
     <description>Recent content in Pages on Static ActivityPub</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 09 Aug 2024 09:50:42 +1000</lastBuildDate>
-    <atom:link href="http://localhost:1313/page/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 20 Sep 2024 16:30:18 +1000</lastBuildDate>
+    <atom:link href="https://staticap.netlify.app/page/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>spring</title>
+      <link>https://staticap.netlify.app/page/spring/</link>
+      <pubDate>Fri, 20 Sep 2024 16:30:18 +1000</pubDate>
+      <guid>https://staticap.netlify.app/page/spring/</guid>
+      <description>spring </description>
+    </item>
     <item>
       <title>Running Activitypub server leveraging static web hosting</title>
-      <link>http://localhost:1313/page/running_activitypub_server_leveraging_static_web_hosting/</link>
+      <link>https://staticap.netlify.app/page/running_activitypub_server_leveraging_static_web_hosting/</link>
       <pubDate>Fri, 09 Aug 2024 09:50:42 +1000</pubDate>
-      <guid>http://localhost:1313/page/running_activitypub_server_leveraging_static_web_hosting/</guid>
+      <guid>https://staticap.netlify.app/page/running_activitypub_server_leveraging_static_web_hosting/</guid>
       <description>hello</description>
     </item>
     <item>
       <title>Implementing Post</title>
-      <link>http://localhost:1313/page/implementing_post/</link>
+      <link>https://staticap.netlify.app/page/implementing_post/</link>
       <pubDate>Fri, 19 Jul 2024 13:49:52 +1000</pubDate>
-      <guid>http://localhost:1313/page/implementing_post/</guid>
+      <guid>https://staticap.netlify.app/page/implementing_post/</guid>
       <description>Following up on &amp;ldquo;Implementing Follow&amp;rdquo;, this article offers and extension for implementing a post publishing feature, that allows you to share contents with a list of your following users on different ActivityPub instances</description>
     </item>
     <item>
       <title>Implementing Follow</title>
-      <link>http://localhost:1313/page/implementing_follow/</link>
+      <link>https://staticap.netlify.app/page/implementing_follow/</link>
       <pubDate>Fri, 19 Jul 2024 13:49:43 +1000</pubDate>
-      <guid>http://localhost:1313/page/implementing_follow/</guid>
+      <guid>https://staticap.netlify.app/page/implementing_follow/</guid>
       <description>Following up on &amp;ldquo;Webfinger for Discovery&amp;rdquo;, this article offers an extension to implementing a following feature, where a user from your static site can send a follow request to other users on various ActivityPub instances, such that you can share your contents to those you are followings.</description>
     </item>
     <item>
       <title>Webfinger For Discovery</title>
-      <link>http://localhost:1313/page/webfinger_for_discovery/</link>
+      <link>https://staticap.netlify.app/page/webfinger_for_discovery/</link>
       <pubDate>Thu, 18 Jul 2024 14:11:45 +1000</pubDate>
-      <guid>http://localhost:1313/page/webfinger_for_discovery/</guid>
+      <guid>https://staticap.netlify.app/page/webfinger_for_discovery/</guid>
       <description>This article contains information about the fundamental of webfinger, and how to setup your webfinger and actor object on your static site, such that they can be discovered by other ActivityPub instances.</description>
     </item>
   </channel>
