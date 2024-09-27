@@ -15,6 +15,7 @@ class BaseHandler:
         self.username = data['username']
         self.domain= data['domain']
         self.site_dir_path = data["site_dir_path"]
+        self.static_dir_path = f"{self.site_dir_path}/static"
         self.public_key_path = data["public_key_path"]
         self.actor_id = f"https://{self.domain}/{self.username}/user-info/actor.json"
         self.follower_url = f"https://{self.domain}/{self.username}/user-info/followers.json"

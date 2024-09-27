@@ -22,7 +22,6 @@ class SiteController:
     def add_follower(self, actor_id=None, webfinger=None): 
         if actor_id == None and webfinger == None:
             return
-        
         if actor_id == None:
             actor_id = self.__add_user_with_webfinger(webfinger) 
             if actor_id == None:
@@ -85,7 +84,7 @@ class SiteController:
     
     def __create_publish_folder(self, url):
         dirs = url.split("/")
-        dirname = self.site_dir_path + "/content"
+        dirname = self.site_dir_path + f"/content/{self.username}"
         for name in dirs:
             dirname += f"/{name}"
             if not os.path.isdir(dirname):
@@ -103,12 +102,13 @@ class SiteController:
 
     def __add_content_to_outbox(self, url, title, content, public):
         dirname = self.__create_static_publish_folder(url)
+        print(dirname.replace(self.static_dir_path, ""))
         follower_url = self.actor_id.replace("actor.json", "followers.json")
-        post_id = f"{dirname}/{title}.json"
+        post_id = f"https://{self.domain}{dirname.replace(self.static_dir_path, '')}/{title}.json"
 
         templator = PublishActivityTemplate(self.actor_id, post_id, content, public)
         data = templator.create_json_activity(None)
-        self.__add_content_to_static_content(post_id, data)
+        self.__add_content_to_static_content(f"{dirname}/{title}.json", data)
         handler = FileDataHandler(self.username, "outbox", self.static_dir_path)
         handler.update(data)
 
@@ -153,28 +153,28 @@ class FileDataHandler:
         with open(filename, "w") as fd:
             json.dump(data, fd, indent=1)
          
-# c = SiteController()
-# url = "page"
-# content = "<p>Spring is coming</p>" 
-# title = "spring"
-# public = True
-# c.publish_post(url, title,content, public)
+c = SiteController()
+url = "page"
+content = "<p>Spring is coming</p>" 
+title = "spring"
+public = True
+c.publish_post(url, title,content, public)
 
-def main():
-    c = SiteController()
-    args = sys.argv
-    if len(args) <= 1:
-        return
-    command = args[1]
-    if command == "follows":
-        data_type = args[2] 
-        if data_type == "webfinger":
-            c.add_follower(webfinger=args[3])
-        else:
-            c.add_follower(actor_id=args[3])
+# def main():
+#     c = SiteController()
+#     args = sys.argv
+#     if len(args) <= 1:
+#         return
+#     command = args[1]
+#     if command == "follows":
+#         data_type = args[2] 
+#         if data_type == "webfinger":
+#             c.add_follower(webfinger=args[3])
+#         else:
+#             c.add_follower(actor_id=args[3])
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
    
 

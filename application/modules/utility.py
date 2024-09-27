@@ -1,4 +1,5 @@
 import json
+import os
 import requests
 from modules.dto.activity_dto import ActivityDTO
 
@@ -9,6 +10,27 @@ def send_get_request(url, headers={}, params={}):
 
 def send_post_request(url, headers, activity):
     return requests.post(url, headers=headers, data=activity)
+
+def read_from_json(filename):
+    with open(filename, "r") as fd:
+        try:
+            return json.load(fd)
+        except Exception:
+            return None
+
+def write_to_json(data: dict, filename: str):
+    with open(filename, "w") as fd:
+        try:
+            fd.write(json.dumps(data, indent=4))
+        except Exception:
+            return False
+    return True
+
+def make_directory(name: str):
+    if not os.path.isdir(name):
+        os.makedirs(name)
+        return True
+    return False
 
 def extract_username_and_domain(webfinger):
     return webfinger.split("@")[1:]
@@ -50,18 +72,12 @@ def __get_follower_id_from_ext_url(data):
         if key not in excluded_keys:
             urls.append(data[key])
     
-    total = None
+    total = data['totalItems']
     follower_ids = [] 
-    print(urls)
-    return
     while True:
         url = urls.pop(0)
         response = requests.get(url, headers={ "accept": "application/activity+json"})
         json_data = json.loads(response.text)
-        
-        # Registers total Items
-        if total == None: 
-            total = json_data['totalItems']
             
         if "orderedItems" not in json_data.keys(): 
             break 
