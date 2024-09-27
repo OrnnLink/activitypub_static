@@ -93,7 +93,10 @@ class ActivityController:
         if not resource_handler.add_post(post_id):
             update= True
         self.handler['user'].publish_post(page_url, title, content, public, update)
-        responses = self.handler['activity'].send_publish_activity(post_id, content, public)
+        if not update:
+            responses = self.handler['activity'].send_publish_activity(post_id, content, public)
+        else:
+            responses = self.handler['activity'].send_update_activity(post_id, content, public)
         for response in responses:
             if not response.ok:
                 return False

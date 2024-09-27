@@ -21,13 +21,27 @@ class ActivityHandler(BaseHandler):
         return self.handler.send_request(activity_dto)
         
     def send_publish_activity(self, post_id, content, public=True):
-        activity_dto = ActivityDTO(post_id=post_id, content=content, public=public, follower_url=self.follower_url, username=self.username)
+        activity_dto = ActivityDTO(post_id=post_id, content=content, public=public,follower_url=self.follower_url, username=self.username)
         activity_dto.activity = self.generator.generate_publish_activity(self.actor_id, activity_dto)
-        return self.__share_to_follower(activity_dto)
+        return self.__share_to_follower(activity_dto) + self.__share_to_following(activity_dto)
+    
+    def send_update_activity(self, post_id, content, public=True):
+        activity_dto = ActivityDTO(post_id=post_id, content=content, public=public, follower_url=self.follower_url, username=self.username)
+        activity_dto.activity = self.generator.generate_update_activity(self.actor_id, activity_dto)
+        return self.__share_to_follower(activity_dto) + self.__share_to_following(activity_dto)
     
     def __share_to_follower(self, activity_dto):
         responses = []
-        for follower in extract_followers_inbox(activity_dto.follower_url):
+        for follower in extract_followers_inbox(self.follower_url):
+            activity_dto.domain = follower.domain
+            activity_dto.inbox_url = follower.inbox_url
+            activity_dto.inbox_endpoint = follower.get_inbox_endpoint()
+            responses.append(self.handler.send_request(activity_dto))
+        return responses
+
+    def __share_to_following(self,activity_dto):
+        responses = []
+        for follower in extract_followers_inbox(self.following_url):
             activity_dto.domain = follower.domain
             activity_dto.inbox_url = follower.inbox_url
             activity_dto.inbox_endpoint = follower.get_inbox_endpoint()
