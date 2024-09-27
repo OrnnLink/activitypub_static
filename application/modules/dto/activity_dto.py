@@ -1,10 +1,11 @@
 class ActivityDTO:
     def __init__(self,
-            domain="", actor_id="", inbox_url ="", activity="",
+            domain="", username="", actor_id="", inbox_url ="", activity="",
             webfinger=None, target_id="", follower_url="",
             post_id="", content="", public=False
         ):
         self.domain = domain
+        self.username = username
         self.actor_id = actor_id
         self.inbox_url = inbox_url
         self.activity = activity

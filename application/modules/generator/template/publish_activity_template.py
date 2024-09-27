@@ -14,7 +14,7 @@ class PublishActivityTemplate(ActivityTemplate):
             "id": post_id,
             "actor": self.actor_id,
             "object": {
-                "id": post_id,
+                "id": post_id.replace(f"page/{activity_dto.username}", f"{activity_dto.username}/content"),
                 "type": "Note", 
                 "published": date,
                 "content": content,

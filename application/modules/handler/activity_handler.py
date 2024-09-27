@@ -21,7 +21,7 @@ class ActivityHandler(BaseHandler):
         return self.handler.send_request(activity_dto)
         
     def send_publish_activity(self, post_id, content, public=True):
-        activity_dto = ActivityDTO(post_id=post_id, content=content, public=public, follower_url=self.follower_url)
+        activity_dto = ActivityDTO(post_id=post_id, content=content, public=public, follower_url=self.follower_url, username=self.username)
         activity_dto.activity = self.generator.generate_publish_activity(self.actor_id, activity_dto)
         return self.__share_to_follower(activity_dto)
     

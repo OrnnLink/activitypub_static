@@ -77,5 +77,27 @@ class ActivityController:
         self.handler['user'].remove_follower(webfinger=webfinger)
         return True
         
+    def publish_content(self):
+        data = read_from_json("activities/publish_activity.json")
+        page_url, title, content, public = data.values()
+        if title == "" or content == "":
+            return False
+        elif page_url == "":
+            page_url = "page"
         
-    
+        resource_handler = self.handler['resource']
+        domain = self.handler['activity'].domain
+        username = self.handler['activity'].username
+        post_id = f"https://{domain}/page/{username}/{page_url}/{title}"
+        update = False
+        if not resource_handler.add_post(post_id):
+            update= True
+        self.handler['user'].publish_post(page_url, title, content, public, update)
+        responses = self.handler['activity'].send_publish_activity(post_id, content, public)
+        for response in responses:
+            if not response.ok:
+                return False
+        return True
+        
+        
+           

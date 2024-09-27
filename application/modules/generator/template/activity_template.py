@@ -9,8 +9,9 @@ class ActivityTemplate:
         
     def create(self, activity_dto):
         self.__get_base_activity(activity_dto)
-        inbox_retriever = ActorInboxRetriever() 
-        activity_dto.inbox_url = inbox_retriever.get_info(activity_dto.target_id)[0]
+        if activity_dto.webfinger is not None:
+            inbox_retriever = ActorInboxRetriever() 
+            activity_dto.inbox_url = inbox_retriever.get_info(activity_dto.target_id)[0]
         return self.create_json_activity(activity_dto)
 
     def create_json_activity(self, activity_dto):

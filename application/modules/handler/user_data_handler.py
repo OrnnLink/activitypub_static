@@ -1,6 +1,7 @@
 import json
 from datetime import datetime, timedelta, timezone
 from modules.utility import make_directory, send_get_request
+from modules.dto.activity_dto import ActivityDTO
 from modules.generator.template.publish_activity_template import PublishActivityTemplate
 from modules.handler.base_handler import BaseHandler
 from modules.handler.file_data_handler import FileDataHandler
@@ -46,9 +47,9 @@ class UserDataHandler(BaseHandler):
         handler = FileDataHandler(self.username, "Following", self.static_dir_path)
         handler.remove_update(actor_id)
     
-    def publish_post(self, url: str, title: str, content: str, public: bool=True):
+    def publish_post(self, url: str, title: str, content: str, public: bool=True, update=False):
         self.__write_publish_content(url, title, content)
-        self.__add_content_to_outbox(url, title, content, public)
+        self.__add_content_to_outbox(url, title, content, public, update)
 
     def __add_user_with_webfinger(self, webfinger): 
         username, domain = webfinger.split("@")[1:]
@@ -105,16 +106,22 @@ class UserDataHandler(BaseHandler):
             make_directory(dirname)
         return dirname
 
-    def __add_content_to_outbox(self, url, title, content, public):
+    def __add_content_to_outbox(self, url, title, content, public, update=True):
         dirname = self.__create_static_publish_folder(url)
-        follower_url = self.actor_id.replace("actor.json", "followers.json")
-        post_id = f"https://{self.domain}{dirname.replace(self.static_dir_path, '')}/{title}.json"
-
-        templator = PublishActivityTemplate(self.actor_id, post_id, content, public)
-        data = templator.create_json_activity(None)
+        post_id = f"https://{self.domain}/page/{self.username}/{url}/{title}"
+        templator = PublishActivityTemplate(
+            self.actor_id
+           
+        )
+        data = templator.create_json_activity(
+         ActivityDTO(
+                username=self.username, post_id=post_id, content=content, public=public,
+                follower_url=self.actor_id.replace("actor.json", "followers.json")
+            )
+        )
         self.__add_content_to_static_content(f"{dirname}/{title}.json", data)
         handler = FileDataHandler(self.username, "outbox", self.static_dir_path)
-        handler.update(data)
+        handler.add_update(data, not update)
 
     def __add_content_to_static_content(self, post_id, data):
         with open(post_id, "w") as fd:

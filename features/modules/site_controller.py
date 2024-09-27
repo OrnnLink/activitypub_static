@@ -102,9 +102,8 @@ class SiteController:
 
     def __add_content_to_outbox(self, url, title, content, public):
         dirname = self.__create_static_publish_folder(url)
-        print(dirname.replace(self.static_dir_path, ""))
         follower_url = self.actor_id.replace("actor.json", "followers.json")
-        post_id = f"https://{self.domain}{dirname.replace(self.static_dir_path, '')}/{title}.json"
+        post_id = f"https://{self.domain}/page/{self.username}/{url}/{title}"
 
         templator = PublishActivityTemplate(self.actor_id, post_id, content, public)
         data = templator.create_json_activity(None)
@@ -154,7 +153,7 @@ class FileDataHandler:
             json.dump(data, fd, indent=1)
          
 c = SiteController()
-url = "page"
+url = "statuses"
 content = "<p>Spring is coming</p>" 
 title = "spring"
 public = True
