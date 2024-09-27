@@ -1,5 +1,7 @@
 from modules.controller.activity_controller import ActivityController
-h = ActivityController()
-# print(h.send_follow_activity())
-# response= h.send_unfollow_activity()
-h.publish_content()
+controller = ActivityController()
+# controller.send_follow_activity()
+# controller.send_unfollow_activity()
+# controller.update_followers()
+# controller.publish_content()
+# controller.create_user()
