@@ -24,8 +24,7 @@ class ActivityRequestHandler(BaseHandler):
         activity = json.dumps(activity_dto.activity)
 
         headers = self.__generate_headers(domain, activity, inbox_endpoint)
-        return
-        # return send_post_request(inbox_url, headers, activity)
+        return send_post_request(inbox_url, headers, activity)
 
     def __generate_headers(self, domain, activity, inbox_endpoint): 
         headers = { "Content-Type": "application/activity+json"}

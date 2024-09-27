@@ -22,7 +22,7 @@ class WebfingerHandler(BaseHandler):
         }
         filename = f"{self.static_dir_path}/.well-known/webfinger"
         write_to_json(template, filename)
-
+    
     def __make_webfinger_dirs(self):
         dirname = f"{self.static_dir_path}/.well-known"
         make_directory(dirname)

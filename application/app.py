@@ -1,4 +1,4 @@
 from modules.controller.activity_controller import ActivityController
 h = ActivityController()
-h.create_user()
-
+# print(h.send_follow_activity())
+response= h.send_unfollow_activity()

@@ -21,12 +21,12 @@ class ResourceHandler(BaseHandler):
     
     def create_user_directory(self, username):
         path = f"resources/users/{username}"
+        self.update_config({"username": username})
         if not make_directory(path):
             return False
         write_to_json({"webfingers": []}, f"{path}/followers.json")
         write_to_json({"webfingers": []}, f"{path}/following.json")
         write_to_json({"posts": []}, f"{path}/posts.json")
-        self.update_config({"username": username})
         return True
     
     # Followers Data
@@ -58,7 +58,7 @@ class ResourceHandler(BaseHandler):
         self.update_user_following_list(self.following)
         return True
     
-    def remove_followng(self, webfinger):
+    def remove_following(self, webfinger):
         if webfinger not in self.following['webfingers']:
             return False
         self.following['webfingers'].remove(webfinger)
