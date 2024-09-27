@@ -13,7 +13,7 @@ class ActivityRequestHandler(BaseHandler):
         super().__init__()
         self.__load_private_key()
     
-    def __load_private_key(self):
+    def __load_private_key(self): 
         with open(self.private_key_path, "rb") as fd:
             self.private_key = load_pem_private_key(fd.read(), password=None)
 
@@ -24,8 +24,7 @@ class ActivityRequestHandler(BaseHandler):
         activity = json.dumps(activity_dto.activity)
 
         headers = self.__generate_headers(domain, activity, inbox_endpoint)
-        print("yes")
-        # return send_post_request(inbox_url, headers, activity)
+        return send_post_request(inbox_url, headers, activity)
 
     def __generate_headers(self, domain, activity, inbox_endpoint): 
         headers = { "Content-Type": "application/activity+json"}

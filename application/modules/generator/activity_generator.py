@@ -1,4 +1,5 @@
 from modules.generator.template.follow_activity_template import FollowActivityTemplate
+from modules.generator.template.unfollow_activity_template import UnFollowActivityTemplate
 from modules.generator.template.publish_activity_template import PublishActivityTemplate
 
 class ActivityGenerator:
@@ -14,4 +15,8 @@ class ActivityGenerator:
         
     def generate_publish_activity(self, actor_id, activity_dto):
         template = PublishActivityTemplate(actor_id)
+        return template.create(activity_dto)
+    
+    def generate_unfollow_activity(self, actor_id, activity_dto):
+        template = UnFollowActivityTemplate(actor_id)
         return template.create(activity_dto)

@@ -2,45 +2,51 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>http://localhost:1313/page/</loc>
+    <loc>https://staticap.netlify.app/noah/</loc>
+    <lastmod>2024-09-27T10:26:45+10:00</lastmod>
+  </url><url>
+    <loc>https://staticap.netlify.app/noah/page/spring/</loc>
+    <lastmod>2024-09-27T10:26:45+10:00</lastmod>
+  </url><url>
+    <loc>https://staticap.netlify.app/</loc>
+    <lastmod>2024-09-27T10:26:45+10:00</lastmod>
+  </url><url>
+    <loc>https://staticap.netlify.app/page/</loc>
     <lastmod>2024-09-20T16:30:18+10:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/page/spring/</loc>
+    <loc>https://staticap.netlify.app/page/spring/</loc>
     <lastmod>2024-09-20T16:30:18+10:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/</loc>
-    <lastmod>2024-09-20T16:30:18+10:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/page/running_activitypub_server_leveraging_static_web_hosting/</loc>
+    <loc>https://staticap.netlify.app/page/running_activitypub_server_leveraging_static_web_hosting/</loc>
     <lastmod>2024-08-09T09:50:42+10:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/extra/</loc>
+    <loc>https://staticap.netlify.app/extra/</loc>
     <lastmod>2024-08-02T13:27:24+10:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/extra/signing_algorithm_refactor/</loc>
+    <loc>https://staticap.netlify.app/extra/signing_algorithm_refactor/</loc>
     <lastmod>2024-08-02T13:27:24+10:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/extra/signing_algorithm/</loc>
+    <loc>https://staticap.netlify.app/extra/signing_algorithm/</loc>
     <lastmod>2024-07-19T14:18:17+10:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/activitypub/</loc>
+    <loc>https://staticap.netlify.app/tags/activitypub/</loc>
     <lastmod>2024-07-19T13:49:52+10:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/page/implementing_post/</loc>
+    <loc>https://staticap.netlify.app/page/implementing_post/</loc>
     <lastmod>2024-07-19T13:49:52+10:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/static-site/</loc>
+    <loc>https://staticap.netlify.app/tags/static-site/</loc>
     <lastmod>2024-07-19T13:49:52+10:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/tags/</loc>
+    <loc>https://staticap.netlify.app/tags/</loc>
     <lastmod>2024-07-19T13:49:52+10:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/page/implementing_follow/</loc>
+    <loc>https://staticap.netlify.app/page/implementing_follow/</loc>
     <lastmod>2024-07-19T13:49:43+10:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/page/webfinger_for_discovery/</loc>
+    <loc>https://staticap.netlify.app/page/webfinger_for_discovery/</loc>
     <lastmod>2024-07-18T14:11:45+10:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/categories/</loc>
+    <loc>https://staticap.netlify.app/categories/</loc>
   </url>
 </urlset>

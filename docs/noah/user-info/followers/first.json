@@ -3,8 +3,5 @@
  "id": "https://staticap.netlify.app/noah/user-info/followers/first.json",
  "partOf": "https://staticap.netlify.app/noah/user-info/followers.json",
  "type": "OrderedCollectionPage",
- "orderedItems": [
-  "https://mastodon.social/users/pbandj9819",
-  "https://sdlay.netlify.app/user-info/ylay/actor.json"
- ]
+ "orderedItems": []
 }
