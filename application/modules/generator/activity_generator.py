@@ -2,6 +2,7 @@ from modules.generator.template.follow_activity_template import FollowActivityTe
 from modules.generator.template.unfollow_activity_template import UnFollowActivityTemplate
 from modules.generator.template.publish_activity_template import PublishActivityTemplate
 from modules.generator.template.update_activity_template import UpdateActivityTemplate
+from modules.generator.template.reply_activity_template import ReplyActivityTemplate
 
 class ActivityGenerator:
     instance = None
@@ -27,5 +28,5 @@ class ActivityGenerator:
         return template.create(activity_dto)
 
     def generate_reply_activity(self, actor_id, activity_dto): 
-        template = UpdateActivityTemplate(actor_id)
+        template = ReplyActivityTemplate(actor_id)
         return template.create(activity_dto)

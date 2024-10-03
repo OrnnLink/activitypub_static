@@ -98,7 +98,7 @@ class ActivityController:
 
         for reply in replies:
             handler.interpret_reply(reply)
-        ...
+        return replies
 
     def send_reply(self):
         data = read_from_json("activities/reply_to_post_activity.json")
@@ -106,12 +106,10 @@ class ActivityController:
         if in_reply_to_id == '' or content == '':
             return False
 
-        # resource_handler = self.handler['resource']
-        # count = resource_handler.add_reply(in_reply_to_id, content)
-        # self.handler['user'].add_reply(f"reply_{count}", in_reply_to_id, content)
-
-        # post_id = f"https://{self.domain}/{self.username}/replies/reply_{count}.json"
-        # responses = self.handler['activity'].send_reply_activity(post_id, in_reply_to_id, content)
+        resource_handler = self.handler['resource']
+        count = resource_handler.add_reply(in_reply_to_id, content)
+        self.handler['user'].add_reply(f"reply_{count}", in_reply_to_id, content)
+        responses = self.handler['activity'].send_reply_activity(count, in_reply_to_id, content)
 
 
 

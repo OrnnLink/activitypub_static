@@ -29,7 +29,7 @@ class ActivityDTO:
         inbox_endpoint = self.inbox_url.split("/")[3:]
         return "/" + "/".join(inbox_endpoint)
 
-    def get_inbox_endpoint(self):
+    def get_outbox_endpoint(self):
         outbox_endpoint = self.outbox_url.split("/")[3:]
         return "/" + "/".join(outbox_endpoint)
 

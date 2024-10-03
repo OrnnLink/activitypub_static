@@ -30,9 +30,11 @@ class ActivityHandler(BaseHandler):
         activity_dto.activity = self.generator.generate_update_activity(self.actor_id, activity_dto)
         return self.__share_to_follower(activity_dto) + self.__share_to_following(activity_dto)
     
-    def send_reply_activity(self, post_id, reply_to_post_id, content, public=True):
+    def send_reply_activity(self, id_count, in_reply_to_id, content, public=True):
+        post_id = f"https://{self.domain}/{self.username}/replies/reply_{id_count}.json"
         activity_dto = ActivityDTO(post_id=post_id, content=content, in_reply_to_id=in_reply_to_id)
         activity_dto.activity = self.generator.generate_reply_activity(self.actor_id, activity_dto)
+        self.__get_post_info(in_reply_to_id, activity_dto)
         return self.handler.send_request(activity_dto)
 
     def __share_to_follower(self, activity_dto):
@@ -52,3 +54,11 @@ class ActivityHandler(BaseHandler):
             activity_dto.inbox_endpoint = follower.get_inbox_endpoint()
             responses.append(self.handler.send_request(activity_dto))
         return responses
+
+    def __get_post_info(self, in_reply_to_id, activity_dto):
+        line = (in_reply_to_id).split("/")
+        inbox_url = "/".join(line[:5]) + '/inbox'
+        activity_dto.inbox_url = inbox_url
+        activity_dto.domain = line[2]
+
+

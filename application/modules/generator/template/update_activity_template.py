@@ -1,3 +1,4 @@
+from datetime import datetime
 from modules.generator.template.activity_template import ActivityTemplate
 
 class UpdateActivityTemplate(ActivityTemplate):

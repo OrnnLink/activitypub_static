@@ -135,6 +135,7 @@ class UserDataHandler(BaseHandler):
         templator = ReplyActivityTemplate(self.actor_id)
         data = templator.create_json_activity(
             ActivityDTO(
+                post_id=post_id, in_reply_to_id=in_reply_to_id, content=content
             )
         )
         dirname = f'{self.static_dir_path}/{self.username}/replies'

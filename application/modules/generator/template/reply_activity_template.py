@@ -6,7 +6,7 @@ class ReplyActivityTemplate(ActivityTemplate):
         date = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
         post_id = activity_dto.post_id
         content = activity_dto.content
-        reply_to_post_id = activity_dto.reply_to_post_id
+        in_reply_to_id = activity_dto.in_reply_to_id
 
         activity = {
             "@context": "https://www.w3.org/ns/activitystreams",
@@ -18,7 +18,7 @@ class ReplyActivityTemplate(ActivityTemplate):
                 "type": "Note", 
                 "published": date,
                 "content": content,
-                "inReplyTo":  reply_to_post_id
+                "inReplyTo": in_reply_to_id
             },
         }
         return activity
