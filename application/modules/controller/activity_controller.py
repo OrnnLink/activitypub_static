@@ -91,4 +91,5 @@ class ActivityController:
     def get_replies(self):
         # how would I solve this problem lmao 
         # Normally, people would send only one of them directly
+
         ...

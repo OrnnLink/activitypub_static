@@ -47,6 +47,7 @@ class WebfingerHandler(BaseHandler):
             "outbox": f"{actor_id}/outbox.json",
             "followers": f"{actor_id}/followers.json",
             "following": f"{actor_id}/following.json",
+            "manuallyApprovesFollowers":false,
             "publicKey": {
                 "@context": "https://w3id.org/security/v1",
                 "@type": "key",

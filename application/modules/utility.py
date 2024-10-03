@@ -50,11 +50,11 @@ def extract_followers_outbox(follower_url):
     if follower_url == None:
         return None
     follower_ids = __get_follower_ids(follower_url)
-    outboxes = __get_inbox_urls(follower_ids)
+    outboxes = __get_outbox_urls(follower_ids)
     for i in range(len(outboxes)):
         data = outboxes[i].split("/")
         domain = data[2]
-        outboxes[i] = ActivityDTO(domain=domain, inbox_url=outboxes[i])
+        outboxes[i] = ActivityDTO(domain=domain, outbox_url=outboxes[i])
     return outboxes
         
 def __get_follower_ids(follower_url):
