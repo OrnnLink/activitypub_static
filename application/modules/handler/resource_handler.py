@@ -12,6 +12,7 @@ class ResourceHandler(BaseHandler):
         self.followers = read_from_json(f"{path}/followers.json") 
         self.following = read_from_json(f"{path}/following.json") 
         self.posts = read_from_json(f"{path}/posts.json") 
+        self.replies = read_from_json(f"{path}/replies.json")
     
     def update_config(self, data: dict):
         config_data = read_from_json("config.json")
@@ -27,6 +28,7 @@ class ResourceHandler(BaseHandler):
         write_to_json({"webfingers": []}, f"{path}/followers.json")
         write_to_json({"webfingers": []}, f"{path}/following.json")
         write_to_json({"posts": []}, f"{path}/posts.json")
+        write_to_json({"posts": [], "reply_count": 0}, f"{path}/replies.json")
         return True
     
     # Followers Data
@@ -91,3 +93,23 @@ class ResourceHandler(BaseHandler):
         make_directory(path)
         path += '/posts.json'
         write_to_json(data, path)
+
+    # Reply Data
+    def add_reply(self, in_reply_to_id, content):
+        count = self.replies['reply_count']
+        self.replies['posts'].append({
+            "id": count,
+            "in_reply_to_id": in_reply_to_id,
+            "content": content
+        })
+        self.replies['reply_count'] = count + 1
+        self.update_user_reply_list(self.replies)
+        return count+1
+
+    def update_user_reply_list(self, data: list):
+        path = f"resources/users/{self.username}"
+        make_directory(path)
+        path += "/replies.json"
+        write_to_json(data, path)
+
+

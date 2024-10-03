@@ -1,20 +1,28 @@
 class ActivityDTO:
     def __init__(self,
-            domain="", username="", actor_id="", inbox_url ="", activity="",
-            webfinger=None, target_id="", follower_url="", outbox_url="",
-            post_id="", content="", public=False
+            domain="", username="", actor_id="", 
+            follower_url="", inbox_url ="", outbox_url="",
+            post_id="", target_id="", in_reply_to_id="",
+            activity="",
+            content="", 
+            webfinger=None, 
+            public=False
         ):
         self.domain = domain
         self.username = username
         self.actor_id = actor_id
+
+        self.follower_url = follower_url
         self.inbox_url = inbox_url
         self.outbox_url = outbox_url
+
+        self.target_id = target_id
+        self.post_id = post_id 
+        self.in_reply_to_id = in_reply_to_id
+
+        self.content = content
         self.activity = activity
         self.webfinger = webfinger
-        self.target_id = target_id
-        self.follower_url = follower_url
-        self.post_id = post_id 
-        self.content = content
         self.public = public
 
     def get_inbox_endpoint(self):

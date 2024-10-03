@@ -15,7 +15,7 @@ def read_from_json(filename):
     with open(filename, "r") as fd:
         try:
             return json.load(fd)
-        except Exception:
+        except Exception as e:
             return None
 
 def write_to_json(data: dict, filename: str):

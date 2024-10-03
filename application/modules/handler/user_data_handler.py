@@ -1,10 +1,14 @@
 import json
 from datetime import datetime, timedelta, timezone
+
 from modules.utility import make_directory, send_get_request
 from modules.dto.activity_dto import ActivityDTO
-from modules.generator.template.publish_activity_template import PublishActivityTemplate
 from modules.handler.base_handler import BaseHandler
 from modules.handler.file_data_handler import FileDataHandler
+
+
+from modules.generator.template.publish_activity_template import PublishActivityTemplate
+from modules.generator.template.reply_activity_template import ReplyActivityTemplate
 
 class UserDataHandler(BaseHandler):
     def add_follower(self, actor_id=None, webfinger=None): 
@@ -50,6 +54,10 @@ class UserDataHandler(BaseHandler):
     def publish_post(self, url: str, title: str, content: str, public: bool=True, update=False):
         self.__write_publish_content(url, title, content)
         self.__add_content_to_outbox(url, title, content, public, update)
+
+    def add_reply(self, title: str, in_reply_to_id: int, content: str):
+        self.__add_reply_to_outbox(title, in_reply_to_id, content)
+        ... 
 
     def __add_user_with_webfinger(self, webfinger): 
         username, domain = webfinger.split("@")[1:]
@@ -111,7 +119,6 @@ class UserDataHandler(BaseHandler):
         post_id = f"https://{self.domain}/page/{self.username}/{url}/{title}"
         templator = PublishActivityTemplate(
             self.actor_id
-           
         )
         data = templator.create_json_activity(
          ActivityDTO(
@@ -122,6 +129,19 @@ class UserDataHandler(BaseHandler):
         self.__add_content_to_static_content(f"{dirname}/{title}.json", data)
         handler = FileDataHandler(self.username, "outbox", self.static_dir_path)
         handler.add_update(data, not update)
+
+    def __add_reply_to_outbox(self, title, in_reply_to_id, content):
+        post_id = f"https://{self.domain}/{self.username}/replies/{title}"
+        templator = ReplyActivityTemplate(self.actor_id)
+        data = templator.create_json_activity(
+            ActivityDTO(
+            )
+        )
+        dirname = f'{self.static_dir_path}/{self.username}/replies'
+        self.__add_content_to_static_content(f"{dirname}/{title}.json", data)
+        # handler = FileDataHandler(self.username, "outbox", self.static_dir_path)
+        # handler.add_update(data, not update)
+
 
     def __add_content_to_static_content(self, post_id, data):
         with open(post_id, "w") as fd:

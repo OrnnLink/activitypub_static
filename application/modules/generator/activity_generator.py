@@ -25,3 +25,7 @@ class ActivityGenerator:
     def generate_update_activity(self, actor_id, activity_dto):
         template = UpdateActivityTemplate(actor_id)
         return template.create(activity_dto)
+
+    def generate_reply_activity(self, actor_id, activity_dto): 
+        template = UpdateActivityTemplate(actor_id)
+        return template.create(activity_dto)

@@ -3,6 +3,7 @@ from modules.handler.activity_handler import ActivityHandler
 from modules.handler.resource_handler import ResourceHandler
 from modules.handler.webfinger_handler import WebfingerHandler
 from modules.handler.user_data_handler import UserDataHandler
+from modules.handler.get_reply_handler  import GetReplyHandler
 
 class ActivityController:
     def __init__(self):
@@ -10,7 +11,8 @@ class ActivityController:
             "activity": ActivityHandler(),
             "resource": ResourceHandler(),
             "webfinger": WebfingerHandler(),
-            "user": UserDataHandler()
+            "user": UserDataHandler(),
+            "reply": GetReplyHandler()
         }
 
     def send_follow_activity(self):
@@ -91,5 +93,27 @@ class ActivityController:
     def get_replies(self):
         # how would I solve this problem lmao 
         # Normally, people would send only one of them directly
+        handler = self.handler['reply']
+        replies = handler.get_replies()
 
+        for reply in replies:
+            handler.interpret_reply(reply)
         ...
+
+    def send_reply(self):
+        data = read_from_json("activities/reply_to_post_activity.json")
+        in_reply_to_id, content = data.values()
+        if in_reply_to_id == '' or content == '':
+            return False
+
+        # resource_handler = self.handler['resource']
+        # count = resource_handler.add_reply(in_reply_to_id, content)
+        # self.handler['user'].add_reply(f"reply_{count}", in_reply_to_id, content)
+
+        # post_id = f"https://{self.domain}/{self.username}/replies/reply_{count}.json"
+        # responses = self.handler['activity'].send_reply_activity(post_id, in_reply_to_id, content)
+
+
+
+
+        

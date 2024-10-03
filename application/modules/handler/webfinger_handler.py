@@ -66,6 +66,7 @@ class WebfingerHandler(BaseHandler):
         make_directory(dirname)
         make_directory(f"{dirname}/user-info")
         make_directory(f"{dirname}/content")
+        make_directory(f"{dirname}/replies")
         
         dirname += "/user-info"
         filenames = [ "actor", "outbox", "inbox", "followers", "following" ]

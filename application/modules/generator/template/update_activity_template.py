@@ -2,6 +2,7 @@ from modules.generator.template.activity_template import ActivityTemplate
 
 class UpdateActivityTemplate(ActivityTemplate):
     def create_json_activity(self, activity_dto):
+        date = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
         post_id = activity_dto.post_id
         content = activity_dto.content
         public = activity_dto.public
@@ -14,7 +15,7 @@ class UpdateActivityTemplate(ActivityTemplate):
                 "id": post_id.replace(f"page/{activity_dto.username}", f"{activity_dto.username}/content"),
                 "type": "Note", 
                 "content": content,
-                "updated": "2024-09-27T06:32:25Z",
+                "updated": date,
                 "to": [ follower_url],
                 "attributedTo": self.actor_id
             },

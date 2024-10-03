@@ -30,6 +30,11 @@ class ActivityHandler(BaseHandler):
         activity_dto.activity = self.generator.generate_update_activity(self.actor_id, activity_dto)
         return self.__share_to_follower(activity_dto) + self.__share_to_following(activity_dto)
     
+    def send_reply_activity(self, post_id, reply_to_post_id, content, public=True):
+        activity_dto = ActivityDTO(post_id=post_id, content=content, in_reply_to_id=in_reply_to_id)
+        activity_dto.activity = self.generator.generate_reply_activity(self.actor_id, activity_dto)
+        return self.handler.send_request(activity_dto)
+
     def __share_to_follower(self, activity_dto):
         responses = []
         for follower in extract_followers_inbox(self.follower_url):
