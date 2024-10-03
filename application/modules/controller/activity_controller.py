@@ -124,7 +124,7 @@ class ActivityController:
             return False
 
         resource_handler = self.handler['resource']
-        count = resource_handler.add_reply(in_reply_to_id, content)-1 
+        count = resource_handler.add_reply(in_reply_to_id, content)-1
         self.handler['user'].add_reply(f"reply_{count}", in_reply_to_id, content)
         responses = self.handler['activity'].send_reply_activity(count, in_reply_to_id, content)
         data = { "in_reply_to_id": "", "content": ""}

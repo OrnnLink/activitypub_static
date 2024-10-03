@@ -6,8 +6,8 @@
     "object": {
         "id": "https://staticap.netlify.app/noah/content/statuses/spring",
         "type": "Note",
-        "published": "Fri, 27 Sep 2024 06:15:13 GMT",
-        "content": "<p>Spring is coming woah woah</p>",
+        "published": "Fri, 27 Sep 2024 06:56:37 GMT",
+        "content": "<p>winter? is coming woah woah</p>",
         "attributedTo": "https://staticap.netlify.app/noah/user-info/actor.json",
         "to": [
             "https://staticap.netlify.app/noah/user-info/followers.json",
