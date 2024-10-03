@@ -1,0 +1,14 @@
+
+@startuml
+actor User
+participant "ActivityController" as A
+participant "ResourceHandler" as B
+participant "UserHandler" as C
+
+User -> A: Request to create WebFinger
+A -> B: Verify if user exists
+B --> A: User exists? No -> Create user, return True Yes -> Return False
+A -> C: Verify if cache exists for new user
+C --> A: Cache exists? No -> Create cache, return True Yes -> Return False
+A --> User: Return success or failure
+@enduml

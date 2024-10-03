@@ -1,8 +1,8 @@
 from modules.utility import read_from_json
 from modules.handler.activity_handler import ActivityHandler
 from modules.handler.resource_handler import ResourceHandler
-from modules.handler.webfinger_handler import WebfingerHandler 
-from modules.handler.user_data_handler import UserDataHandler 
+from modules.handler.webfinger_handler import WebfingerHandler
+from modules.handler.user_data_handler import UserDataHandler
 
 class ActivityController:
     def __init__(self):
@@ -12,10 +12,10 @@ class ActivityController:
             "webfinger": WebfingerHandler(),
             "user": UserDataHandler()
         }
-    
+
     def send_follow_activity(self):
         data = read_from_json("activities/following_activity.json")
-        webfinger =  data['webfinger']
+        webfinger = data['webfinger']
         if webfinger == "":
             return False
 
@@ -23,60 +23,52 @@ class ActivityController:
         if not resource_handler.add_following(webfinger):
             return False
 
-        response = self.handler['activity'].send_follow_activity(webfinger)
-        if not response.ok:
+        if self.handler['user'].add_following(webfinger=webfinger) is None:
             return False
-        self.handler['user'].add_following(webfinger=webfinger)
-        return True
+        response = self.handler['activity'].send_follow_activity(webfinger)
 
     def send_unfollow_activity(self):
         data = read_from_json("activities/unfollow_activity.json")
         webfinger= data['webfinger']
         if webfinger == "":
-            return False 
-        
+            return False
+
         resource_handler = self.handler['resource']
         if not resource_handler.remove_following(webfinger):
             return False
-        
-        response = self.handler['activity'].send_unfollow_activity(webfinger)
-        if not response.ok:
-            return False
+
         self.handler['user'].remove_following(webfinger=webfinger)
-        return True
-        
+        response = self.handler['activity'].send_unfollow_activity(webfinger)
+
     def create_user(self):
         data = read_from_json("activities/webfinger_activity.json")
         username = data['username']
         if username == "":
-            return False 
+            return False
 
         resource_handler = self.handler['resource']
         if not resource_handler.create_user_directory(username):
             self.handler['webfinger'].make_webfinger(username)
-            return False 
+            return False
         self.handler['webfinger'].create_user(username)
         return True
-    
-    def update_followers(self): 
+
+    def update_followers(self):
         data = read_from_json("activities/update_followers_activity.json")
         webfinger = data['webfinger']
         add_followers = data['add_follower']
-        if webfinger == "": 
+        if webfinger == "":
             return False
 
         resource_handler = self.handler['resource']
         if add_followers:
-            if not resource_handler.add_follower(webfinger):
-                return False
             self.handler['user'].add_follower(webfinger=webfinger)
-            return True
-         
-        if not resource_handler.remove_follower(webfinger):
-            return False
+            resource_handler.add_follower(webfinger)
+            return
+
         self.handler['user'].remove_follower(webfinger=webfinger)
-        return True
-        
+        resource_handler.remove_follower(webfinger)
+
     def publish_content(self):
         data = read_from_json("activities/publish_activity.json")
         page_url, title, content, public = data.values()
@@ -84,7 +76,7 @@ class ActivityController:
             return False
         elif page_url == "":
             page_url = "page"
-        
+
         resource_handler = self.handler['resource']
         domain = self.handler['activity'].domain
         username = self.handler['activity'].username
@@ -92,12 +84,17 @@ class ActivityController:
         update = False
         if not resource_handler.add_post(post_id):
             update= True
+
         self.handler['user'].publish_post(page_url, title, content, public, update)
         responses = self.handler['activity'].send_publish_activity(post_id, content, public)
-        for response in responses:
-            if not response.ok:
-                return False
-        return True
-        
-        
-           
+
+
+
+
+
+
+
+    def get_replies(self):
+        # how would I solve this problem lmao 
+        # Normally, people would send only one of them directly
+        ...

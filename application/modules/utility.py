@@ -45,6 +45,17 @@ def extract_followers_inbox(follower_url):
         domain = data[2]
         inboxes[i] = ActivityDTO(domain=domain, inbox_url=inboxes[i])
     return inboxes
+
+def extract_followers_outbox(follower_url):
+    if follower_url == None:
+        return None
+    follower_ids = __get_follower_ids(follower_url)
+    outboxes = __get_inbox_urls(follower_ids)
+    for i in range(len(outboxes)):
+        data = outboxes[i].split("/")
+        domain = data[2]
+        outboxes[i] = ActivityDTO(domain=domain, inbox_url=outboxes[i])
+    return outboxes
         
 def __get_follower_ids(follower_url):
     response = send_get_request(follower_url)
@@ -108,3 +119,12 @@ def __get_inbox_urls(follower_ids):
             json.loads(response.text)['inbox']
         )
     return inboxes
+
+def __get_outbox_urls(follower_ids):
+    outboxes = []
+    for id in follower_ids:
+        response = send_get_request(id)
+        outboxes.append(
+            json.loads(response.text)['outbox']
+        )
+    return outboxes
