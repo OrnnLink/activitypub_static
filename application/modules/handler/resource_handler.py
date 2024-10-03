@@ -20,11 +20,17 @@ class ResourceHandler(BaseHandler):
             config_data[key] = data[key]
         write_to_json(config_data, "config.json")
     
-    def create_user_directory(self, username):
+    def create_user_directory(self, username, domain=""):
         path = f"resources/users/{username}"
-        self.update_config({"username": username})
+
+        config_update = {"username": username}
+        if domain != "":
+            self.domain = domain
+            config_update['domain'] = domain
+
+        self.update_config(config_update)
         if not make_directory(path):
-            return False
+            return False 
         write_to_json({"webfingers": []}, f"{path}/followers.json")
         write_to_json({"webfingers": []}, f"{path}/following.json")
         write_to_json({"posts": []}, f"{path}/posts.json")

@@ -3,9 +3,14 @@ from modules.handler.base_handler import BaseHandler
 from modules.utility import make_directory, write_to_json
 
 class WebfingerHandler(BaseHandler):
-    def create_user(self, username):
-        self.make_webfinger(username)
-        self.make_actor_object(username)
+    def create_user(self, username, domain):
+        if domain != "":
+            self.__update_domain_in_hugo(domain)
+        elif username != self.username:
+            self.make_webfinger(username)
+            self.make_actor_object(username)
+            actor_id = f"https://{self.domain}/{username}/user-info"
+            self.__make_actor_info_files(username, actor_id)
         
     def make_webfinger(self, username):
         self.__make_webfinger_dirs()
@@ -22,6 +27,16 @@ class WebfingerHandler(BaseHandler):
         }
         filename = f"{self.static_dir_path}/.well-known/webfinger"
         write_to_json(template, filename)
+
+    def __update_domain_in_hugo(self, domain):
+        self.domain = domain
+        filename = f"{self.site_dir_path}/hugo.toml"
+        data = [line.strip() for line in open(filename, "r")]
+        with open(filename, "w") as fd:
+            for i, line in enumerate(data):
+                if "baseURL" in line:
+                    data[i] = f"baseURL = 'https://{domain}/'"
+                fd.write(data[i] + "\n")
     
     def __make_webfinger_dirs(self):
         dirname = f"{self.static_dir_path}/.well-known"
@@ -47,7 +62,7 @@ class WebfingerHandler(BaseHandler):
             "outbox": f"{actor_id}/outbox.json",
             "followers": f"{actor_id}/followers.json",
             "following": f"{actor_id}/following.json",
-            "manuallyApprovesFollowers":false,
+            "manuallyApprovesFollowers": False,
             "publicKey": {
                 "@context": "https://w3id.org/security/v1",
                 "@type": "key",
@@ -58,7 +73,6 @@ class WebfingerHandler(BaseHandler):
         }
         filename = f"{self.static_dir_path}/{username}/user-info/actor.json"
         write_to_json(template, filename)
-        self.__make_actor_info_files(username, actor_id)
                         
     def __make_actor_json_files(self, username):
         # makes the username file
@@ -92,12 +106,12 @@ class WebfingerHandler(BaseHandler):
             filename = f"{self.static_dir_path}/{username}/user-info/{name}"
             write_to_json(template, f"{filename}.json")
             
-            template = {
-                "@context": "https://www.w3.org/ns/activitystreams",
-                "id": f"{actor_id}/{name}/first.json",
-                "partOf": f"{actor_id}/{name}.json",
-                "type": "OrderedCollectionPage",
-                "orderedItems": []
-            }
-            write_to_json(template, f"{filename}/first.json")
+            # template = {
+            #     "@context": "https://www.w3.org/ns/activitystreams",
+            #     "id": f"{actor_id}/{name}/first.json",
+            #     "partOf": f"{actor_id}/{name}.json",
+            #     "type": "OrderedCollectionPage",
+            #     "orderedItems": []
+            # }
+            # write_to_json(template, f"{filename}/first.json")
        

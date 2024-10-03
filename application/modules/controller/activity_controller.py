@@ -1,4 +1,4 @@
-from modules.utility import read_from_json
+from modules.utility import read_from_json, write_to_json
 from modules.handler.activity_handler import ActivityHandler
 from modules.handler.resource_handler import ResourceHandler
 from modules.handler.webfinger_handler import WebfingerHandler
@@ -16,7 +16,8 @@ class ActivityController:
         }
 
     def send_follow_activity(self):
-        data = read_from_json("activities/following_activity.json")
+        filename = "activities/following_activity.json"
+        data = read_from_json(filename)
         webfinger = data['webfinger']
         if webfinger == "":
             return False
@@ -28,9 +29,13 @@ class ActivityController:
         if self.handler['user'].add_following(webfinger=webfinger) is None:
             return False
         response = self.handler['activity'].send_follow_activity(webfinger)
+        data = { "webfinger": ""}
+        self.__reset_activity(data, filename)
+
 
     def send_unfollow_activity(self):
-        data = read_from_json("activities/unfollow_activity.json")
+        filename = "activities/unfollow_activity.json"
+        data = read_from_json(filename)
         webfinger= data['webfinger']
         if webfinger == "":
             return False
@@ -41,22 +46,27 @@ class ActivityController:
 
         self.handler['user'].remove_following(webfinger=webfinger)
         response = self.handler['activity'].send_unfollow_activity(webfinger)
+        data = { "webfinger": ""}
+        self.__reset_activity(data, filename)
 
     def create_user(self):
         data = read_from_json("activities/webfinger_activity.json")
-        username = data['username']
-        if username == "":
+        username, domain = data.values()
+        if username == "" and domain == "":
             return False
 
         resource_handler = self.handler['resource']
-        if not resource_handler.create_user_directory(username):
+        if not resource_handler.create_user_directory(username, domain):
+            self.handler['webfinger'].domain = domain
             self.handler['webfinger'].make_webfinger(username)
+            self.handler['webfinger'].make_actor_object(username)
             return False
-        self.handler['webfinger'].create_user(username)
+        self.handler['webfinger'].create_user(username, domain)
         return True
 
     def update_followers(self):
-        data = read_from_json("activities/update_followers_activity.json")
+        filename = "activities/update_followers_activity.json"
+        data = read_from_json(filename)
         webfinger = data['webfinger']
         add_followers = data['add_follower']
         if webfinger == "":
@@ -71,8 +81,13 @@ class ActivityController:
         self.handler['user'].remove_follower(webfinger=webfinger)
         resource_handler.remove_follower(webfinger)
 
+        data = { "webfinger": "", "add_follower": True}
+        self.__reset_activity(data, filename)
+
+
     def publish_content(self):
-        data = read_from_json("activities/publish_activity.json")
+        filename = "activities/publish_activity.json"
+        data = read_from_json(filename)
         page_url, title, content, public = data.values()
         if title == "" or content == "":
             return False
@@ -90,9 +105,10 @@ class ActivityController:
         self.handler['user'].publish_post(page_url, title, content, public, update)
         responses = self.handler['activity'].send_publish_activity(post_id, content, public)
 
+        data = { "page_url": "", "title": "", "content": "", "public": True}
+        self.__reset_activity(data, filename)
+
     def get_replies(self):
-        # how would I solve this problem lmao 
-        # Normally, people would send only one of them directly
         handler = self.handler['reply']
         replies = handler.get_replies()
 
@@ -101,17 +117,22 @@ class ActivityController:
         return replies
 
     def send_reply(self):
-        data = read_from_json("activities/reply_to_post_activity.json")
+        filename = "activities/reply_to_post_activity.json"
+        data = read_from_json(filename)
         in_reply_to_id, content = data.values()
         if in_reply_to_id == '' or content == '':
             return False
 
         resource_handler = self.handler['resource']
-        count = resource_handler.add_reply(in_reply_to_id, content)
+        count = resource_handler.add_reply(in_reply_to_id, content)-1 
         self.handler['user'].add_reply(f"reply_{count}", in_reply_to_id, content)
         responses = self.handler['activity'].send_reply_activity(count, in_reply_to_id, content)
+        data = { "in_reply_to_id": "", "content": ""}
+        self.__reset_activity(data, filename)
 
 
+    def __reset_activity(self, data, filename):
+        write_to_json(data, filename)
 
 
         

@@ -13,6 +13,7 @@
     "outbox": "https://staticap.netlify.app/noah/user-info/outbox.json",
     "followers": "https://staticap.netlify.app/noah/user-info/followers.json",
     "following": "https://staticap.netlify.app/noah/user-info/following.json",
+    "manuallyApprovesFollowers": false,
     "publicKey": {
         "@context": "https://w3id.org/security/v1",
         "@type": "key",

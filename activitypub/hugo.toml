@@ -1,9 +1,8 @@
 baseURL = 'https://staticap.netlify.app/'
 languageCode = 'en-us'
 title = 'Static ActivityPub'
-
 publishDir = "../docs"
-[markup]
-  [markup.highlight]
-    style = "pastie"
 
+[markup]
+[markup.highlight]
+style = "pastie"
