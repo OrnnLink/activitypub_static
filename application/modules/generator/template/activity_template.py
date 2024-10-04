@@ -23,8 +23,8 @@ class ActivityTemplate:
         
         username, domain = extract_username_and_domain(activity_dto.webfinger)
         target_info = self.retriever.get_info([username, domain])
-        if len(target_info) != 1:
-            return
+        # if len(target_info) != 1:
+        #     return
         activity_dto.domain = domain
         activity_dto.target_id = target_info[0]
 
