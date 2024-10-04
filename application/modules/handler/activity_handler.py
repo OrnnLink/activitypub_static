@@ -6,9 +6,8 @@ from modules.dto.activity_dto import ActivityDTO
 from modules.handler.activity_request_handler import ActivityRequestHandler
 
 
-class ActivityHandler(BaseHandler): 
+class ActivityHandler(): 
     def __init__(self):
-        super().__init__()
         self.generator = ActivityGenerator.get_instance()
         self.config_handler = ConfigDataHandler.get_instance()
         self.request_handler = ActivityRequestHandler()
@@ -18,14 +17,14 @@ class ActivityHandler(BaseHandler):
         activity_dto.activity = self.generator.generate_follow_activity(
             self.config_handler.actor_id, activity_dto
         )
-        # return self.request_handler.send_request(activity_dto)
+        return self.request_handler.send_request(activity_dto)
 
     def send_unfollow_activity(self, webfinger):
         activity_dto = ActivityDTO(webfinger=webfinger)
         activity_dto.activity = self.generator.generate_unfollow_activity(
             self.config_handler.actor_id, activity_dto
         )
-        # return self.request_handler.send_request(activity_dto)
+        return self.request_handler.send_request(activity_dto)
         
     def send_publish_activity(self, post_id, content, public=True):
         activity_dto = ActivityDTO(
@@ -35,7 +34,7 @@ class ActivityHandler(BaseHandler):
         activity_dto.activity = self.generator.generate_publish_activity(
             self.config_handler.actor_id, activity_dto
         )
-        # return self.__share_to_follower(activity_dto) + self.__share_to_following(activity_dto)
+        return self.__share_to_follower(activity_dto) + self.__share_to_following(activity_dto)
     
     def send_update_activity(self, post_id, content, public=True):
         activity_dto = ActivityDTO(
@@ -45,7 +44,7 @@ class ActivityHandler(BaseHandler):
         activity_dto.activity = self.generator.generate_update_activity(
             self.config_handler.actor_id, activity_dto
         )
-        # return self.__share_to_follower(activity_dto) + self.__share_to_following(activity_dto)
+        return self.__share_to_follower(activity_dto) + self.__share_to_following(activity_dto)
     
     def send_reply_activity(self, id_count, in_reply_to_id, content):
         post_id = f"https://{self.domain}/{self.username}/replies/reply_{id_count}.json"
@@ -54,7 +53,7 @@ class ActivityHandler(BaseHandler):
             self.config_handler.actor_id, activity_dto
         )
         self.__get_post_info(in_reply_to_id, activity_dto)
-        # return self.request_handler.send_request(activity_dto)
+        return self.request_handler.send_request(activity_dto)
 
     def __share_to_follower(self, activity_dto):
         responses = []
