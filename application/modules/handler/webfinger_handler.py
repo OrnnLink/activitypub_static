@@ -9,7 +9,7 @@ class WebfingerHandler:
     def create_user(self, username, domain):
         if domain != "":
             self.__update_domain_in_hugo(domain)
-        elif username != self.config_handler.username:
+        if username != self.config_handler.username:
             self.make_webfinger(username)
             self.make_actor_object(username)
             actor_id = f"https://{self.config_handler.domain}/{username}/user-info"
