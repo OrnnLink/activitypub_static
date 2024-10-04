@@ -7,8 +7,9 @@ class WebfingerHandler:
         self.config_handler = ConfigDataHandler.get_instance()
         
     def create_user(self, username, domain):
-        if domain != "":
+        if domain != "" and domain != self.config_handler.domain:
             self.__update_domain_in_hugo(domain)
+
         if username != self.config_handler.username:
             self.make_webfinger(username)
             self.make_actor_object(username)

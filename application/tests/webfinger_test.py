@@ -7,13 +7,12 @@ from tests.utility import make_test_folder, tear_down_test_folders, read_from_js
 
 class WebfingerHandlerTest(unittest.TestCase):
 	@classmethod
-	def setUpClass(cls):
+	def setUp(cls):
 		make_test_folder()
 		cls.handler = WebfingerHandler()
 		
 	def tearDown(self):
 		tear_down_test_folders()
-		...
     
 	def __verify(self, username, domain):
 		self.__verify_domain_in_hugo_toml(domain=domain)
@@ -100,26 +99,46 @@ class WebfingerHandlerTest(unittest.TestCase):
 	def __verify_support_files_created(self, username, actor_id): 
 		filenames = [ "followers", "following", "inbox", "outbox"]
 		prefix = f"tests/activitypub/static/{username}/user-info"
-		for filename in filenames:
-			self.assertTrue(os.path.isdir(f"{prefix}/{filename}"))
-			filename = f"{prefix}/{filename}.json"
+		for name in filenames:
+			self.assertTrue(os.path.isdir(f"{prefix}/{name}"))
+			filename = f"{prefix}/{name}.json"
+			
 			data = read_from_json(filename)
 			self.assertIsNotNone(data)
 			expected = {
-				
+				"@context": "https://www.w3.org/ns/activitystreams",
+				"id": actor_id.replace("actor", name),
+				"type": "OrderedCollection",
+				"totalItems": 0,
+				"first": f"{actor_id.replace('actor.json', name)}/first.json"
 			}
+			self.assertEqual(expected, data)
 
-			filename = f"{prefix}/{filename}.json"
+			filename = f"{prefix}/{name}/first.json"
 			data = read_from_json(filename)
 			self.assertIsNotNone(data)
+			expected = {
+				"@context": "https://www.w3.org/ns/activitystreams",
+				"id": f"{actor_id.replace('actor.json', name)}/first.json",
+				"partOf": actor_id.replace("actor", name),  
+				"type": "OrderedCollectionPage",
+				"orderedItems": []
+			}
+			self.assertEqual(expected, data)
 		
 	def test_basic_create(self):
 		username = 'simon'
 		domain = "test.domain.com"
 		self.handler.create_user(username, domain)
 		self.__verify(username, domain)
+	
+	def test_create_already_existed_user(self):
+		username =  'noah'
+		domain = "staticap.netlify.app"
+		self.handler.create_user(username, domain)
+		self.assertFalse(os.path.isdir("tests/activitypub/static/noah"))
+		self.__verify_domain_in_hugo_toml(domain)
 		
-		...
 
 	
     	

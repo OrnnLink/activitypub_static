@@ -46,7 +46,6 @@ def tear_down_test_folders():
         shutil.rmtree(dirname)
     os.remove("tests/config.json")
     
-    
 def __make_config_file():
     filename = "tests/config.json"
     data = {
