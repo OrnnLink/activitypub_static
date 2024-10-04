@@ -2,10 +2,14 @@ import json
 from datetime import datetime, timedelta
 from modules.utility import extract_followers_outbox, send_get_request
 from modules.handler.base_handler import BaseHandler
+from modules.handler.config_data_handler import ConfigDataHandler
 
 class GetReplyHandler(BaseHandler):
+	def __init__(self):
+		self.config_handler = ConfigDataHandler.get_instance()
+
 	def get_replies(self) -> list:
-		outboxes = extract_followers_outbox(self.follower_url)
+		outboxes = extract_followers_outbox(self.config_handler.follower_url)
 		posts = self.__retrieve_posts_from_outboxes(outboxes)
 		filtered_posts = self.__filtered_posts(posts)
 		return filtered_posts
@@ -71,28 +75,28 @@ class GetReplyHandler(BaseHandler):
 				continue 
 
 			if activity_type.lower() == "announce":
-				if (self.domain in object_map and self.username in object_map):
+				if (self.config_handler.domain in object_map and self.config_handler.username in object_map):
 					filtered_posts.append(post) 
 				continue
 			elif activity_type.lower() == "create":
 				in_reply_to = object_map.get("inReplyTo", "")
 				if not in_reply_to:
 					continue
-				elif (self.domain in in_reply_to and self.username in in_reply_to):
+				elif (self.config_handler.domain in in_reply_to and self.config_handler.username in in_reply_to):
 					filtered_posts.append(post)
 		return filtered_posts
 
 	def interpret_reply(self, reply: dict):
-	 	activity_type = reply.get("type", "")
-	 	if not activity_type:
-	 		return
-	 	print(f"\nReply ID: {reply.get('id', '')}")
-	 	print(f"Activity Type: {activity_type}")
+		activity_type = reply.get("type", "")
+		if not activity_type:
+			return
+		print(f"\nReply ID: {reply.get('id', '')}")
+		print(f"Activity Type: {activity_type}")
 
-	 	if activity_type.lower() == "announce":
-	 		print(reply.get('object', ''))
-	 	else:
-	 		print(reply['object']['content'])
+		if activity_type.lower() == "announce":
+			print(reply.get('object', ''))
+		else:
+			print(reply['object']['content'])
 
 	def __iterate_dict(self, data, indent=0): 
 		for key in data:

@@ -6,7 +6,6 @@ from modules.dto.activity_dto import ActivityDTO
 from modules.handler.base_handler import BaseHandler
 from modules.handler.file_data_handler import FileDataHandler
 
-
 from modules.generator.template.publish_activity_template import PublishActivityTemplate
 from modules.generator.template.reply_activity_template import ReplyActivityTemplate
 

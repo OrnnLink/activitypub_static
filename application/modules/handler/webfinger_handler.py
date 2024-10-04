@@ -106,12 +106,12 @@ class WebfingerHandler(BaseHandler):
             filename = f"{self.static_dir_path}/{username}/user-info/{name}"
             write_to_json(template, f"{filename}.json")
             
-            # template = {
-            #     "@context": "https://www.w3.org/ns/activitystreams",
-            #     "id": f"{actor_id}/{name}/first.json",
-            #     "partOf": f"{actor_id}/{name}.json",
-            #     "type": "OrderedCollectionPage",
-            #     "orderedItems": []
-            # }
-            # write_to_json(template, f"{filename}/first.json")
+            template = {
+                "@context": "https://www.w3.org/ns/activitystreams",
+                "id": f"{actor_id}/{name}/first.json",
+                "partOf": f"{actor_id}/{name}.json",
+                "type": "OrderedCollectionPage",
+                "orderedItems": []
+            }
+            write_to_json(template, f"{filename}/first.json")
        

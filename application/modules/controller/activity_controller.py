@@ -22,15 +22,15 @@ class ActivityController:
         if webfinger == "":
             return False
 
-        resource_handler = self.handler['resource']
-        if not resource_handler.add_following(webfinger):
-            return False
+        # resource_handler = self.handler['resource']
+        # if not resource_handler.add_following(webfinger):
+        #     return False
 
-        if self.handler['user'].add_following(webfinger=webfinger) is None:
-            return False
+        # if self.handler['user'].add_following(webfinger=webfinger) is None:
+        #     return False
         response = self.handler['activity'].send_follow_activity(webfinger)
-        data = { "webfinger": ""}
-        self.__reset_activity(data, filename)
+        # data = { "webfinger": ""}
+        # self.__reset_activity(data, filename)
 
 
     def send_unfollow_activity(self):
@@ -40,14 +40,14 @@ class ActivityController:
         if webfinger == "":
             return False
 
-        resource_handler = self.handler['resource']
-        if not resource_handler.remove_following(webfinger):
-            return False
+        # resource_handler = self.handler['resource']
+        # if not resource_handler.remove_following(webfinger):
+        #     return False
 
-        self.handler['user'].remove_following(webfinger=webfinger)
+        # self.handler['user'].remove_following(webfinger=webfinger)
         response = self.handler['activity'].send_unfollow_activity(webfinger)
-        data = { "webfinger": ""}
-        self.__reset_activity(data, filename)
+        # data = { "webfinger": ""}
+        # self.__reset_activity(data, filename)
 
     def create_user(self):
         data = read_from_json("activities/webfinger_activity.json")
@@ -55,12 +55,12 @@ class ActivityController:
         if username == "" and domain == "":
             return False
 
-        resource_handler = self.handler['resource']
-        if not resource_handler.create_user_directory(username, domain):
-            self.handler['webfinger'].domain = domain
-            self.handler['webfinger'].make_webfinger(username)
-            self.handler['webfinger'].make_actor_object(username)
-            return False
+        # resource_handler = self.handler['resource']
+        # if not resource_handler.create_user_directory(username, domain):
+        #     self.handler['webfinger'].domain = domain
+        #     self.handler['webfinger'].make_webfinger(username)
+        #     self.handler['webfinger'].make_actor_object(username)
+        #     return False
         self.handler['webfinger'].create_user(username, domain)
         return True
 
@@ -94,19 +94,19 @@ class ActivityController:
         elif page_url == "":
             page_url = "page"
 
-        resource_handler = self.handler['resource']
-        domain = self.handler['activity'].domain
-        username = self.handler['activity'].username
-        post_id = f"https://{domain}/page/{username}/{page_url}/{title}"
-        update = False
-        if not resource_handler.add_post(post_id):
-            update= True
+        # resource_handler = self.handler['resource']
+        # domain = self.handler['activity'].domain
+        # username = self.handler['activity'].username
+        # post_id = f"https://{domain}/page/{username}/{page_url}/{title}"
+        # update = False
+        # if not resource_handler.add_post(post_id):
+        #     update= True
 
-        self.handler['user'].publish_post(page_url, title, content, public, update)
+        # self.handler['user'].publish_post(page_url, title, content, public, update)
         responses = self.handler['activity'].send_publish_activity(post_id, content, public)
 
-        data = { "page_url": "", "title": "", "content": "", "public": True}
-        self.__reset_activity(data, filename)
+        # data = { "page_url": "", "title": "", "content": "", "public": True}
+        # self.__reset_activity(data, filename)
 
     def get_replies(self):
         handler = self.handler['reply']
@@ -123,12 +123,12 @@ class ActivityController:
         if in_reply_to_id == '' or content == '':
             return False
 
-        resource_handler = self.handler['resource']
-        count = resource_handler.add_reply(in_reply_to_id, content)-1
-        self.handler['user'].add_reply(f"reply_{count}", in_reply_to_id, content)
+        # resource_handler = self.handler['resource']
+        # count = resource_handler.add_reply(in_reply_to_id, content)-1
+        # self.handler['user'].add_reply(f"reply_{count}", in_reply_to_id, content)
         responses = self.handler['activity'].send_reply_activity(count, in_reply_to_id, content)
-        data = { "in_reply_to_id": "", "content": ""}
-        self.__reset_activity(data, filename)
+        # data = { "in_reply_to_id": "", "content": ""}
+        # self.__reset_activity(data, filename)
 
 
     def __reset_activity(self, data, filename):

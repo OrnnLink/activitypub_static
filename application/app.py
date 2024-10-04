@@ -2,13 +2,6 @@ from modules.utility import read_from_json
 from modules.controller.activity_controller import ActivityController
 import subprocess
 
-# controller.send_reply()
-# controller.get_replies()
-# controller.send_follow_activity()
-# controller.send_unfollow_activity()
-# controller.update_followers()
-# controller.publish_content()
-# controller.create_user()
 
 # g = GetReplyHandler()
 # g.get_replies()
@@ -89,5 +82,14 @@ def main():
 
 
 if __name__ == "__main__":
-	main()
+	controller = ActivityController()
+	# controller.send_reply()
+	# controller.get_replies()
+	# controller.send_follow_activity()
+	# controller.send_unfollow_activity()
+	# controller.update_followers()
+	# controller.publish_content()
+	controller.create_user()
+
+	# main()
 
