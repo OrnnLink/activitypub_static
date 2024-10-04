@@ -9,7 +9,7 @@ class WebfingerHandler:
     def create_user(self, username, domain):
         if domain != "":
             self.__update_domain_in_hugo(domain)
-        elif username != self.config_handler.username:
+        if username != self.config_handler.username:
             self.make_webfinger(username)
             self.make_actor_object(username)
             actor_id = f"https://{self.config_handler.domain}/{username}/user-info"
@@ -26,7 +26,7 @@ class WebfingerHandler:
                     "type": "application/activity+json"
                 },
             ],
-            "subject": f"acct:{self.config_handler.username}@{self.config_handler.domain}"
+            "subject": f"acct:{username}@{self.config_handler.domain}"
         }
         filename = f"{self.config_handler.static_dir_path}/.well-known/webfinger"
         write_to_json(template, filename)
@@ -34,7 +34,9 @@ class WebfingerHandler:
     def __update_domain_in_hugo(self, domain):
         self.config_handler.domain = domain
         filename = f"{self.config_handler.site_dir_path}/hugo.toml"
-        data = [line.strip() for line in open(filename, "r")]
+        with open(filename, "r") as fd:
+            data = fd.readlines()
+        data = [ line.strip() for line in data]
         with open(filename, "w") as fd:
             for i, line in enumerate(data):
                 if "baseURL" in line:
@@ -49,7 +51,9 @@ class WebfingerHandler:
     def make_actor_object(self, username):
         self.__make_actor_json_files(username)
         actor_id = f"https://{self.config_handler.domain}/{username}/user-info"
-        publicKey = "\n".join([line.strip() for line in open(self.config_handler.public_key_path, "r")])
+        with open(self.config_handler.public_key_path, "r") as fd:
+            publicKey = fd.readlines()
+        publicKey = "\n".join([line.strip() for line in publicKey])
         template = {
             "@context": [
                 "https://www.w3.org/ns/activitystreams",
