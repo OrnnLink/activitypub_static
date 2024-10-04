@@ -19,7 +19,7 @@ from modules.generate_key import generate_key, write_key_to_files
 def make_test_folder():
     dirnames = [
         "tests/activitypub", "tests/activitypub/static",
-        "tests/resources", "tests/activities"
+        "tests/resources", "tests/activities", "tests/resources/users"
     ]
     for dirname in dirnames: 
         os.makedirs(dirname)

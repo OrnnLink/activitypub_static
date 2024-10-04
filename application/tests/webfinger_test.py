@@ -2,7 +2,7 @@ import unittest
 import os
 
 from modules.handler.webfinger_handler import WebfingerHandler
-from modules.handler.webfinger_handler import ConfigDataHandler
+from modules.handler.config_data_handler import ConfigDataHandler
 from tests.utility import make_test_folder, tear_down_test_folders, read_from_json
 
 class WebfingerHandlerTest(unittest.TestCase):

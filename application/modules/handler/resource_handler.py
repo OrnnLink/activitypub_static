@@ -2,13 +2,13 @@ from modules.utility import read_from_json, write_to_json, make_directory
 from modules.handler.config_data_handler import ConfigDataHandler
 
 class ResourceHandler:
-    def __init__(self):
-        super().__init__()
+    def __init__(self, path="resources/users"):
+        self.path = path 
         self.__setup()
     
     def __setup(self):
         self.config_handler = ConfigDataHandler.get_instance()
-        path = f"resources/users/{self.config_handler.username}"
+        path = f"{self.path}/{self.config_handler.username}"
         self.create_user_directory(self.config_handler.username)
         self.followers = read_from_json(f"{path}/followers.json") 
         self.following = read_from_json(f"{path}/following.json") 
@@ -16,14 +16,13 @@ class ResourceHandler:
         self.replies = read_from_json(f"{path}/replies.json")
     
     def update_config(self, data: dict):
-        config_data = read_from_json("config.json")
+        config_data = read_from_json(self.config_handler.filename)
         for key in data:
             config_data[key] = data[key]
-        write_to_json(config_data, "config.json")
+        write_to_json(config_data, self.config_handler.filename)
     
     def create_user_directory(self, username, domain=""):
-        path = f"resources/users/{username}"
-
+        path = f"{self.path}/{username}"
         config_update = {"username": username}
         if domain != "":
             self.domain = domain
@@ -54,7 +53,7 @@ class ResourceHandler:
         return True
 
     def update_user_followers_list(self, data: list):
-        path = f"resources/users/{self.config_handler.username}"
+        path = f"{self.path}/{self.config_handler.username}"
         make_directory(path)
         path += '/followers.json'
         write_to_json(data, path)
@@ -75,7 +74,7 @@ class ResourceHandler:
         return True
         
     def update_user_following_list(self, data: list):
-        path = f"resources/users/{self.config_handler.username}"
+        path = f"{self.path}/{self.config_handler.username}"
         make_directory(path)
         path += '/following.json'
         write_to_json(data, path)
@@ -96,7 +95,7 @@ class ResourceHandler:
         return True
     
     def update_user_post_list(self, data: list):
-        path = f"resources/users/{self.config_handler.username}"
+        path = f"{self.path}/{self.config_handler.username}"
         make_directory(path)
         path += '/posts.json'
         write_to_json(data, path)
@@ -114,7 +113,7 @@ class ResourceHandler:
         return count+1
 
     def update_user_reply_list(self, data: list):
-        path = f"resources/users/{self.config_handler.username}"
+        path = f"{self.path}/{self.config_handler.username}"
         make_directory(path)
         path += "/replies.json"
         write_to_json(data, path)
