@@ -9,7 +9,32 @@
             "id": 1,
             "in_reply_to_id": "https://mastodon.social/users/pbandj9819/statuses/113241049198515643",
             "content": "I know right, hurray!!! Winter"
+        },
+        {
+            "id": 2,
+            "in_reply_to_id": "https://mastodon.social/users/pbandj9819/statuses/113241049198515643/activity",
+            "content": "what do you think about summer?"
+        },
+        {
+            "id": 3,
+            "in_reply_to_id": "https://mastodon.social/users/pbandj9819/statuses/113241049198515643/activity",
+            "content": "What do you think about summer"
+        },
+        {
+            "id": 4,
+            "in_reply_to_id": "https://mastodon.social/users/pbandj9819/statuses/113241049198515643/activity",
+            "content": "What do you think about summer?"
+        },
+        {
+            "id": 5,
+            "in_reply_to_id": "https://mastodon.social/users/pbandj9819/statuses/113241049198515643/activity",
+            "content": "What do you think about summer?"
+        },
+        {
+            "id": 6,
+            "in_reply_to_id": "https://mastodon.social/users/pbandj9819/statuses/113241049198515643",
+            "content": "What do you think about summer?"
         }
     ],
-    "reply_count": 2
+    "reply_count": 7
 }

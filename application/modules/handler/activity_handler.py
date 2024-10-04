@@ -27,7 +27,7 @@ class ActivityHandler():
     def send_publish_activity(self, post_id, content, public=True):
         activity_dto = ActivityDTO(
             post_id=post_id, content=content, public=public,
-            follower_url=self.config_handler.follower_url, username=self.username
+            follower_url=self.config_handler.follower_url, username=self.config_handler.username
         )
         activity_dto.activity = self.generator.generate_publish_activity(
             self.config_handler.actor_id, activity_dto
@@ -45,7 +45,7 @@ class ActivityHandler():
         return self.__share_to_follower(activity_dto) + self.__share_to_following(activity_dto)
     
     def send_reply_activity(self, id_count, in_reply_to_id, content):
-        post_id = f"https://{self.domain}/{self.username}/replies/reply_{id_count}.json"
+        post_id = f"https://{self.config_handler.domain}/{self.config_handler.username}/replies/reply_{id_count}.json"
         activity_dto = ActivityDTO(post_id=post_id, content=content, in_reply_to_id=in_reply_to_id)
         activity_dto.activity = self.generator.generate_reply_activity(
             self.config_handler.actor_id, activity_dto

@@ -82,7 +82,7 @@ def main():
 
 
 if __name__ == "__main__":
-	# controller = ActivityController()
+	controller = ActivityController()
 	# controller.send_reply()
 	# controller.get_replies()
 	# controller.send_follow_activity()

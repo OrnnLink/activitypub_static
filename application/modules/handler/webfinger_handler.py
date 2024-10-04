@@ -1,15 +1,18 @@
 import os
-from modules.handler.base_handler import BaseHandler
 from modules.utility import make_directory, write_to_json
+from modules.handler.config_data_handler import ConfigDataHandler
 
-class WebfingerHandler(BaseHandler):
+class WebfingerHandler:
+    def __init__(self):
+        self.config_handler = ConfigDataHandler.get_instance()
+        
     def create_user(self, username, domain):
         if domain != "":
             self.__update_domain_in_hugo(domain)
-        elif username != self.username:
+        elif username != self.config_handler.username:
             self.make_webfinger(username)
             self.make_actor_object(username)
-            actor_id = f"https://{self.domain}/{username}/user-info"
+            actor_id = f"https://{self.config_handler.domain}/{username}/user-info"
             self.__make_actor_info_files(username, actor_id)
         
     def make_webfinger(self, username):
@@ -18,19 +21,19 @@ class WebfingerHandler(BaseHandler):
             "aliases": [],
             "links": [
                 {
-                    "href": f"https://{self.domain}/{username}/user-info/actor.json",
+                    "href": f"https://{self.config_handler.domain}/{username}/user-info/actor.json",
                     "rel": "self",
                     "type": "application/activity+json"
                 },
             ],
-            "subject": f"acct:{self.username}@{self.domain}"
+            "subject": f"acct:{self.config_handler.username}@{self.config_handler.domain}"
         }
-        filename = f"{self.static_dir_path}/.well-known/webfinger"
+        filename = f"{self.config_handler.static_dir_path}/.well-known/webfinger"
         write_to_json(template, filename)
 
     def __update_domain_in_hugo(self, domain):
-        self.domain = domain
-        filename = f"{self.site_dir_path}/hugo.toml"
+        self.config_handler.domain = domain
+        filename = f"{self.config_handler.site_dir_path}/hugo.toml"
         data = [line.strip() for line in open(filename, "r")]
         with open(filename, "w") as fd:
             for i, line in enumerate(data):
@@ -39,14 +42,14 @@ class WebfingerHandler(BaseHandler):
                 fd.write(data[i] + "\n")
     
     def __make_webfinger_dirs(self):
-        dirname = f"{self.static_dir_path}/.well-known"
+        dirname = f"{self.config_handler.static_dir_path}/.well-known"
         make_directory(dirname)
         return self
      
     def make_actor_object(self, username):
         self.__make_actor_json_files(username)
-        actor_id = f"https://{self.domain}/{username}/user-info"
-        publicKey = "\n".join([line.strip() for line in open(self.public_key_path, "r")])
+        actor_id = f"https://{self.config_handler.domain}/{username}/user-info"
+        publicKey = "\n".join([line.strip() for line in open(self.config_handler.public_key_path, "r")])
         template = {
             "@context": [
                 "https://www.w3.org/ns/activitystreams",
@@ -71,12 +74,12 @@ class WebfingerHandler(BaseHandler):
                 "publicKeyPem": f"{publicKey}"
             }
         }
-        filename = f"{self.static_dir_path}/{username}/user-info/actor.json"
+        filename = f"{self.config_handler.static_dir_path}/{username}/user-info/actor.json"
         write_to_json(template, filename)
                         
     def __make_actor_json_files(self, username):
         # makes the username file
-        dirname = f"{self.static_dir_path}/{username}"
+        dirname = f"{self.config_handler.static_dir_path}/{username}"
         make_directory(dirname)
         make_directory(f"{dirname}/user-info")
         make_directory(f"{dirname}/content")
@@ -103,7 +106,7 @@ class WebfingerHandler(BaseHandler):
                 "totalItems": 0,
                 "first": f"{actor_id}/{name}/first.json"
             }
-            filename = f"{self.static_dir_path}/{username}/user-info/{name}"
+            filename = f"{self.config_handler.static_dir_path}/{username}/user-info/{name}"
             write_to_json(template, f"{filename}.json")
             
             template = {

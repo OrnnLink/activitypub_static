@@ -55,7 +55,7 @@ class UserDataHandler:
     
     def publish_post(self, url: str, title: str, content: str, public: bool=True, update=False):
         self.__write_publish_content(url, title, content)
-        self.__add_content_to_outbox(url, title, content, public, update)
+        self.__add_content_to_outbox(url, title.replace(' ', '_'), content, public, update)
 
     def add_reply(self, title: str, in_reply_to_id: int, content: str):
         self.__add_reply_to_outbox(title, in_reply_to_id, content)
@@ -127,7 +127,7 @@ class UserDataHandler:
                 follower_url=self.config_handler.actor_id.replace("actor.json", "followers.json")
             )
         )
-        self.__add_content_to_static_content(f"{dirname}/{title}.json", data)
+        self.__add_content_to_static_content(f"{dirname}/{title.replace(' ', '_')}.json", data)
         handler = FileDataHandler(self.config_handler.username, "outbox", self.config_handler.static_dir_path)
         handler.add_update(data, not update)
 
@@ -139,8 +139,8 @@ class UserDataHandler:
                 post_id=post_id, in_reply_to_id=in_reply_to_id, content=content
             )
         )
-        dirname = f'{self.static_dir_path}/{self.username}/replies'
-        self.__add_content_to_static_content(f"{dirname}/{title}.json", data)
+        dirname = f'{self.config_handler.static_dir_path}/{self.config_handler.username}/replies'
+        self.__add_content_to_static_content(f"{dirname}/{title.replace(' ', '_')}.json", data)
         # handler = FileDataHandler(self.username, "outbox", self.static_dir_path)
         # handler.add_update(data, not update)
 

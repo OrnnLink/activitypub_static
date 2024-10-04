@@ -95,17 +95,18 @@ class ActivityController:
             page_url = "page"
 
         resource_handler = self.handler['resource']
-        domain = self.handler['activity'].domain
-        username = self.handler['activity'].username
-        post_id = f"https://{domain}/page/{username}/{page_url}/{title}"
+        domain = self.handler['activity'].config_handler.domain
+        username = self.handler['activity'].config_handler.username
+        post_id = f"https://{domain}/page/{username}/{page_url}/{title.replace(' ', '_')}"
         update = False
         if not resource_handler.add_post(post_id):
             update= True
 
+
         self.handler['user'].publish_post(page_url, title, content, public, update)
         responses = self.handler['activity'].send_publish_activity(post_id, content, public)
 
-        data = { "page_url": "", "title": "", "content": "", "public": True}
+        data = { "page_url": "statuses", "title": "", "content": "", "public": True}
         self.__reset_activity(data, filename)
 
     def get_replies(self):
@@ -122,6 +123,7 @@ class ActivityController:
         in_reply_to_id, content = data.values()
         if in_reply_to_id == '' or content == '':
             return False
+        in_reply_to_id = self.__format_in_reply_to_id(in_reply_to_id)
 
         resource_handler = self.handler['resource']
         count = resource_handler.add_reply(in_reply_to_id, content)-1
@@ -130,6 +132,19 @@ class ActivityController:
         data = { "in_reply_to_id": "", "content": ""}
         self.__reset_activity(data, filename)
 
+    def __format_in_reply_to_id(self, in_reply_to_id):
+        split_data = in_reply_to_id.split("/")
+        i = len(split_data) - 1
+        while i > 2:
+            try:
+                ele = int(split_data[i])
+            except ValueError:
+                split_data.pop(i)
+                i -= 1
+                continue
+            break
+
+        return "/".join(split_data)
 
     def __reset_activity(self, data, filename):
         write_to_json(data, filename)
