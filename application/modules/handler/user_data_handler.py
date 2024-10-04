@@ -79,7 +79,7 @@ class UserDataHandler:
 
     def __write_publish_content(self, url, title, content):
         front_matter = self.__get_front_matter(title)
-        file_content = f"{front_matter}" + f"# {title}\n" + f"{content}\n"
+        file_content = f"{front_matter}" + f"{content}\n"
         dirname = self.__create_publish_folder(url)
         title = title.replace(" ", "_")
         filename = f"{dirname}/{title}.md"

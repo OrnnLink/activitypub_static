@@ -2,73 +2,66 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Static ActivityPub</title>
-    <link>https://staticap.netlify.app/</link>
+    <link>http://localhost:1313/</link>
     <description>Recent content on Static ActivityPub</description>
     <generator>Hugo</generator>
     <language>en-us</language>
     <lastBuildDate>Fri, 04 Oct 2024 11:46:20 +1000</lastBuildDate>
-    <atom:link href="https://staticap.netlify.app/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Summer is coming</title>
-      <link>https://staticap.netlify.app/noah/page/summer_is_coming/</link>
+      <link>http://localhost:1313/noah/page/summer_is_coming/</link>
       <pubDate>Fri, 04 Oct 2024 11:46:20 +1000</pubDate>
-      <guid>https://staticap.netlify.app/noah/page/summer_is_coming/</guid>
-      <description>Summer is coming </description>
+      <guid>http://localhost:1313/noah/page/summer_is_coming/</guid>
+      <description>Cause a little bit of summer is what the whole year is all about!</description>
     </item>
     <item>
       <title>spring</title>
-      <link>https://staticap.netlify.app/noah/statuses/spring/</link>
+      <link>http://localhost:1313/noah/statuses/spring/</link>
       <pubDate>Fri, 27 Sep 2024 16:56:37 +1000</pubDate>
-      <guid>https://staticap.netlify.app/noah/statuses/spring/</guid>
-      <description>spring </description>
-    </item>
-    <item>
-      <title>spring</title>
-      <link>https://staticap.netlify.app/page/spring/</link>
-      <pubDate>Fri, 20 Sep 2024 16:30:18 +1000</pubDate>
-      <guid>https://staticap.netlify.app/page/spring/</guid>
-      <description>spring </description>
+      <guid>http://localhost:1313/noah/statuses/spring/</guid>
+      <description>winter? is coming woah woah</description>
     </item>
     <item>
       <title>Running Activitypub server leveraging static web hosting</title>
-      <link>https://staticap.netlify.app/page/running_activitypub_server_leveraging_static_web_hosting/</link>
+      <link>http://localhost:1313/page/running_activitypub_server_leveraging_static_web_hosting/</link>
       <pubDate>Fri, 09 Aug 2024 09:50:42 +1000</pubDate>
-      <guid>https://staticap.netlify.app/page/running_activitypub_server_leveraging_static_web_hosting/</guid>
+      <guid>http://localhost:1313/page/running_activitypub_server_leveraging_static_web_hosting/</guid>
       <description>hello</description>
     </item>
     <item>
       <title>Signing Algorithm Refactor</title>
-      <link>https://staticap.netlify.app/extra/signing_algorithm_refactor/</link>
+      <link>http://localhost:1313/extra/signing_algorithm_refactor/</link>
       <pubDate>Fri, 02 Aug 2024 13:27:24 +1000</pubDate>
-      <guid>https://staticap.netlify.app/extra/signing_algorithm_refactor/</guid>
+      <guid>http://localhost:1313/extra/signing_algorithm_refactor/</guid>
       <description>Previously on Signing Algorithm, it involves multiple steps and function calls to utitlise the algorithm. This article go through refactoring steps on the algorithm under object-oriented programming. Enabling the generation and usage of ActivityPub activity under a single function call.&#xA;.You can use the following for quick navigation:&#xA;Usage - insight into how to use the codebase Activity Handler - insight into the ActivityHandler class Activity Generator - insight into the ActivityGenerator class Activity Request - insight into ActivityRequest class Actor Info Retriever - insight into ActorInfoRetriever class Full Codebase - a preview of the whole codebase combining all the components The refactoring process is done by converting the algorithm into a more object-oriented approach, and separated the algorithm function into 4 components:</description>
     </item>
     <item>
       <title>Signing Algorithm</title>
-      <link>https://staticap.netlify.app/extra/signing_algorithm/</link>
+      <link>http://localhost:1313/extra/signing_algorithm/</link>
       <pubDate>Fri, 19 Jul 2024 14:18:17 +1000</pubDate>
-      <guid>https://staticap.netlify.app/extra/signing_algorithm/</guid>
+      <guid>http://localhost:1313/extra/signing_algorithm/</guid>
       <description>Signing Algorithm We will be implementing our private key signing algorithm using Python algorithm, it is recommended that you install the following python libraries on your machine or python environment:&#xA;pip install cryptography pip install requests Note Different ActivityPub platforms requires different levels of security for signature. The algorithm we used for this section have only been tested on Mastodon, Honk and Ktistec. It works successfully for both Mastodon and Honk, but Ktistec requires additional security that I haven&#39;t quite figured out yet due to resource constraint.</description>
     </item>
     <item>
       <title>Implementing Post</title>
-      <link>https://staticap.netlify.app/page/implementing_post/</link>
+      <link>http://localhost:1313/page/implementing_post/</link>
       <pubDate>Fri, 19 Jul 2024 13:49:52 +1000</pubDate>
-      <guid>https://staticap.netlify.app/page/implementing_post/</guid>
+      <guid>http://localhost:1313/page/implementing_post/</guid>
       <description>Following up on &amp;ldquo;Implementing Follow&amp;rdquo;, this article offers and extension for implementing a post publishing feature, that allows you to share contents with a list of your following users on different ActivityPub instances</description>
     </item>
     <item>
       <title>Implementing Follow</title>
-      <link>https://staticap.netlify.app/page/implementing_follow/</link>
+      <link>http://localhost:1313/page/implementing_follow/</link>
       <pubDate>Fri, 19 Jul 2024 13:49:43 +1000</pubDate>
-      <guid>https://staticap.netlify.app/page/implementing_follow/</guid>
+      <guid>http://localhost:1313/page/implementing_follow/</guid>
       <description>Following up on &amp;ldquo;Webfinger for Discovery&amp;rdquo;, this article offers an extension to implementing a following feature, where a user from your static site can send a follow request to other users on various ActivityPub instances, such that you can share your contents to those you are followings.</description>
     </item>
     <item>
       <title>Webfinger For Discovery</title>
-      <link>https://staticap.netlify.app/page/webfinger_for_discovery/</link>
+      <link>http://localhost:1313/page/webfinger_for_discovery/</link>
       <pubDate>Thu, 18 Jul 2024 14:11:45 +1000</pubDate>
-      <guid>https://staticap.netlify.app/page/webfinger_for_discovery/</guid>
+      <guid>http://localhost:1313/page/webfinger_for_discovery/</guid>
       <description>This article contains information about the fundamental of webfinger, and how to setup your webfinger and actor object on your static site, such that they can be discovered by other ActivityPub instances.</description>
     </item>
   </channel>

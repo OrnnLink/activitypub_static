@@ -1,12 +1,14 @@
 {{ define "main" }} 
     <div class="page-body-container">
-    {{ $excluded_pages := slice "/users" "/categories" "/tags" "/extra"}}
-    {{ range $page := .Site.Pages }}
+    {{ $excluded_pages := slice "/users" "/categories" "/tags" "/extra" }}
+    {{ range $page := .Site.Pages }} 
         {{ $excluded := false }}
         {{ range $excluded_pages }}
             {{ if in $page.RelPermalink . }}
                 {{ $excluded = true }}
             {{ else if eq $page.RelPermalink "/page/" }}
+                {{ $excluded = true }}
+            {{ else if eq $page.RelPermalink "/noah/"}}
                 {{ $excluded = true }}
             {{ else if eq $page.RelPermalink "/" }}
                 {{ $excluded = true }} {{ end }}
@@ -22,7 +24,7 @@
                     {{ if .Params.summary }} 
                         <p>{{ .Params.summary | safeHTML }}</p>
                     {{ else }}
-                        <p>Generic Descriptions</p>
+                        <p>{{ .Content | plainify | truncate 300 }}</p>
                     {{ end }} 
                 </article>
                 <section class="card-footer">
