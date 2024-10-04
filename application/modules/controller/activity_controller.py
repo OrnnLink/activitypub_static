@@ -22,15 +22,15 @@ class ActivityController:
         if webfinger == "":
             return False
 
-        # resource_handler = self.handler['resource']
-        # if not resource_handler.add_following(webfinger):
-        #     return False
+        resource_handler = self.handler['resource']
+        if not resource_handler.add_following(webfinger):
+            return False
 
-        # if self.handler['user'].add_following(webfinger=webfinger) is None:
-        #     return False
+        if self.handler['user'].add_following(webfinger=webfinger) is None:
+            return False
         response = self.handler['activity'].send_follow_activity(webfinger)
-        # data = { "webfinger": ""}
-        # self.__reset_activity(data, filename)
+        data = { "webfinger": ""}
+        self.__reset_activity(data, filename)
 
 
     def send_unfollow_activity(self):

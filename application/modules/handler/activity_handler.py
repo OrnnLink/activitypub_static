@@ -1,10 +1,8 @@
 from modules.utility import extract_followers_inbox
-from modules.handler.base_handler import BaseHandler
 from modules.handler.config_data_handler import ConfigDataHandler
 from modules.generator.activity_generator import ActivityGenerator
 from modules.dto.activity_dto import ActivityDTO
 from modules.handler.activity_request_handler import ActivityRequestHandler
-
 
 class ActivityHandler(): 
     def __init__(self):

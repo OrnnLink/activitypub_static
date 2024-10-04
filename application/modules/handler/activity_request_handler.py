@@ -5,16 +5,16 @@ from datetime import datetime, timezone
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
-from modules.handler.base_handler import BaseHandler
+from modules.handler.config_data_handler import ConfigDataHandler
 from modules.utility import send_post_request
 
-class ActivityRequestHandler(BaseHandler):
+class ActivityRequestHandler:
     def __init__(self):
-        super().__init__()
+        self.config_handler = ConfigDataHandler.get_instance()
         self.__load_private_key()
     
     def __load_private_key(self): 
-        with open(self.private_key_path, "rb") as fd:
+        with open(self.config_handler.private_key_path, "rb") as fd:
             self.private_key = load_pem_private_key(fd.read(), password=None)
 
     def send_request(self, activity_dto):
@@ -56,7 +56,7 @@ class ActivityRequestHandler(BaseHandler):
         )
         signature = base64.b64encode(signature).decode('utf-8')
 
-        key_id = f"{self.actor_id}#main-key"
+        key_id = f"{self.config_handler.actor_id}#main-key"
         signature_header = (
         f'keyId="{key_id}",'
         f'headers="(request-target) host date digest",'
