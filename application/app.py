@@ -88,7 +88,6 @@ def main():
 		subprocess.run(command, shell=True, capture_output=True, text=True)
 
 
-
 if __name__ == "__main__":
 	main()
 
