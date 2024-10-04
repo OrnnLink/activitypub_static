@@ -55,7 +55,7 @@ class FileDataHandler:
     def __remove_update_part_name_count(self):
         filename = f"{self.static_dir_path}/{self.username}/user-info/{self.part_name}.json"
         followers_json = read_from_json(filename)
-        followers_json['totalItems'] = 1
+        followers_json['totalItems'] -= 1
         write_to_json(followers_json, filename)
     
 

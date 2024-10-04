@@ -4,22 +4,11 @@ import shutil
 from modules.handler.config_data_handler import ConfigDataHandler
 from modules.generate_key import generate_key, write_key_to_files
 
-# def mock_config_handler():
-#     handler = ConfigDataHandler.get_instance()
-#     handler.username = data['username']
-#     handler.domain= data['domain']
-#     handler.site_dir_path = data["site_dir_path"]
-#     handler.static_dir_path = f"{self.site_dir_path}/static"
-#     handler.public_key_path = data["public_key_path"]
-#     self.actor_id = f"https://{self.domain}/{self.username}/user-info/actor.json"
-#     self.follower_url = f"https://{self.domain}/{self.username}/user-info/followers.json"
-#     self.following_url = f"https://{self.domain}/{self.username}/user-info/following.json"
-#     self.private_key_path = data["private_key_path"]
-
 def make_test_folder():
     dirnames = [
         "tests/activitypub", "tests/activitypub/static",
-        "tests/resources", "tests/activities", "tests/resources/users"
+        "tests/resources", "tests/activities", "tests/resources/users",
+        "tests/activitypub/content",
     ]
     for dirname in dirnames: 
         os.makedirs(dirname)
@@ -33,6 +22,7 @@ def make_test_folder():
             fd.writelines(lines)
     __make_config_file()
     __make_keys()
+    __make_activities_files()
     handler = ConfigDataHandler.get_instance()
     handler.set_config("tests/config.json")
 
@@ -62,6 +52,32 @@ def __make_keys():
     write_key_to_files(private_pem, public_pem, "tests/resources/")
 
 def __make_activities_files():
+    os.makedirs("tests/activitypub/static/noah")
+    os.makedirs("tests/activitypub/static/noah/user-info")
+    os.makedirs("tests/activitypub/static/noah/replies")
+    filenames = [ 'followers', "following", "outbox", "inbox"]
+    path= "tests/activitypub/static/noah/user-info"
+    for name in filenames:
+        filename = f"{path}/{name}.json"
+        data = {
+            "@context": "https://www.w3.org/ns/activitystreams",
+            "id": f"https://staticap.netlify.app/noah/user-info/{name}.json",
+            "type": "OrderedCollection",
+            "totalItems": 0,
+            "first": f"https://staticap.netlify.app/noah/user-info/{name}/first.json"
+        }
+        write_to_json(data,filename)
+        os.makedirs(f"{path}/{name}")
+        filename = f"{path}/{name}/first.json"
+        data = {
+            "@context": "https://www.w3.org/ns/activitystreams",
+            "id": f"https://staticap.netlify.app/noah/user-info/{name}/first.json",
+            "partOf": f"https://staticap.netlify.app/noah/user-info/{name}.json",
+            "type": "OrderedCollectionPage",
+            "orderedItems": []
+        }
+        write_to_json(data,filename)
+        ...
     ...
 
 

@@ -136,7 +136,6 @@ class WebfingerHandlerTest(unittest.TestCase):
 		username =  'noah'
 		domain = "staticap.netlify.app"
 		self.handler.create_user(username, domain)
-		self.assertFalse(os.path.isdir("tests/activitypub/static/noah"))
 		self.__verify_domain_in_hugo_toml(domain)
 		
 
