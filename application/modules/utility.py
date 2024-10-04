@@ -59,7 +59,6 @@ def extract_followers_outbox(follower_url):
         
 def __get_follower_ids(follower_url):
     response = send_get_request(follower_url)
-    print(follower_url, response.text)
     data = json.loads(response.text)
     
     if "orderedItems" in data:

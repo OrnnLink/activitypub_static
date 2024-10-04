@@ -1,10 +1,9 @@
 import json
 from datetime import datetime, timedelta
 from modules.utility import extract_followers_outbox, send_get_request
-from modules.handler.base_handler import BaseHandler
 from modules.handler.config_data_handler import ConfigDataHandler
 
-class GetReplyHandler(BaseHandler):
+class GetReplyHandler:
 	def __init__(self):
 		self.config_handler = ConfigDataHandler.get_instance()
 
