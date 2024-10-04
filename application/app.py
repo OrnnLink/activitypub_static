@@ -82,16 +82,16 @@ def main():
 
 
 if __name__ == "__main__":
-	# controller = ActivityController()
+	controller = ActivityController()
 	# controller.send_reply()
 	# controller.get_replies()
 	# controller.send_follow_activity()
 	# controller.send_unfollow_activity()
 	# controller.update_followers()
 	# controller.publish_content()
-	# controller.create_user()
+	controller.create_user()
 	
-	main()
+	# main()
 	...
 
 
