@@ -9,7 +9,6 @@ class GetReplyHandler:
 
 	def get_replies(self) -> list:
 		outboxes = extract_followers_outbox(self.config_handler.follower_url)
-		print(outboxes)
 		posts = self.__retrieve_posts_from_outboxes(outboxes)
 		filtered_posts = self.__filtered_posts(posts)
 		return filtered_posts
