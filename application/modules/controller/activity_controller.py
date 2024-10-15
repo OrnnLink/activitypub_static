@@ -52,15 +52,15 @@ class ActivityController:
     def create_user(self):
         data = read_from_json("activities/webfinger_activity.json")
         username, domain = data.values()
-        # if username == "" and domain == "":
-        #     return False
+        if username == "" and domain == "":
+            return False
 
-        # resource_handler = self.handler['resource']
-        # if not resource_handler.create_user_directory(username, domain):
-        #     self.handler['webfinger'].domain = domain
-        #     self.handler['webfinger'].make_webfinger(username)
-        #     self.handler['webfinger'].make_actor_object(username)
-        #     return False
+        resource_handler = self.handler['resource']
+        if not resource_handler.create_user_directory(username, domain):
+            self.handler['webfinger'].domain = domain
+            self.handler['webfinger'].make_webfinger(username)
+            self.handler['webfinger'].make_actor_object(username)
+            return False
         self.handler['webfinger'].create_user(username, domain)
         return True
 

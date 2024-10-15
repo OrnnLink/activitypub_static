@@ -3,6 +3,6 @@
     "domain": "staticap.netlify.app",
     "site_dir_path": "../activitypub",
     "public_key_path": "resources/public_key.pem",
-    "site_dir_path": "../activitypub",
+    "private_key_path": "resources/private_key.pem",
     "root_dir_path": ".."
 }

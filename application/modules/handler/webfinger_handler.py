@@ -7,7 +7,6 @@ class WebfingerHandler:
         self.config_handler = ConfigDataHandler.get_instance()
         
     def create_user(self, username, domain):
-        """
         if domain != "":
             self.__update_domain_in_hugo(domain)
         elif username != self.config_handler.username:
@@ -15,9 +14,8 @@ class WebfingerHandler:
             self.make_actor_object(username)
             actor_id = f"https://{self.config_handler.domain}/{username}/user-info"
             self.__make_actor_info_files(username, actor_id)
-            """
-        self.__update_netlify_toml(username)
-        
+            self.__update_netlify_toml(username)
+
     def make_webfinger(self, username):
         self.__make_webfinger_dirs()
         template = {
@@ -38,11 +36,16 @@ class WebfingerHandler:
         path = self.config_handler.root_dir_path + "/netlify.toml"
         with open(path, "r") as fd:
             data = fd.readlines()
+        for line in data:
+            if "for" in line and username in line:
+                print("no write occurs")
+                return
+
         data.append("[[headers]]\n")
         data.append(f'for = "/{username}/*"\n')
         data.append("[headers.values]\n")
         data.append('Content-Type = "application/activity+json; charset=utf-8"\n\n')
-        with open(path, "r") as fd:
+        with open(path, "w") as fd:
             fd.writelines(data)
         
     
