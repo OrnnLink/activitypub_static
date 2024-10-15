@@ -1,0 +1,955 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Signing Algorithm Refactor</title>
+           
+        <link rel="stylesheet" href="/scss/style.css" />
+          
+        <link rel="stylesheet" href="/scss/header.css" />
+          
+        <link rel="stylesheet" href="/scss/footer.css" />
+          
+        <link rel="stylesheet" href="/scss/list.css" />
+          
+        <link rel="stylesheet" href="/scss/shortcodes.css" />
+        
+    </head>
+    <body>
+        <header>
+    <nav class="navbar">
+        <h1>Signing Algorithm Refactor</h1>
+    </nav>
+</header>
+ 
+        
+<div class="page-body-container">
+	<h1>Signing Algorithm Refactor</h1>
+	<p><em>Published on: 2024-08-02 13:27:24 &#43;1000 AEST</em></p>
+	
+		<section>
+			<strong>Pre-requisite: </strong>
+			
+			
+			
+			
+				
+				<a class="pre-link" href="/extra/signing_algorithm" style="text-transform: capitalize;">Signing Algorithm</a> 
+				
+				
+			
+		</section>
+	
+	<hr>
+	<p>Previously on <a href="/extra/signing_algorithm">Signing Algorithm</a>, it involves multiple steps and function calls to utitlise the algorithm. This article go through refactoring steps on the algorithm under object-oriented programming. Enabling the generation and usage of ActivityPub activity under a single function call.</p>
+<p>.You can use the following for quick navigation:</p>
+<ol>
+<li><a href="#usage">Usage</a> - insight into how to use the codebase</li>
+<li><a href="#activity_handler">Activity Handler</a> - insight into the ActivityHandler class</li>
+<li><a href="#activity_generator">Activity Generator</a> - insight into the ActivityGenerator class</li>
+<li><a href="#activity_request">Activity Request</a> - insight into ActivityRequest class</li>
+<li><a href="#actor_info_retriever">Actor Info Retriever</a> - insight into ActorInfoRetriever class</li>
+<li><a href="#full_codebase">Full Codebase</a> - a preview of the whole codebase combining all the components</li>
+</ol>
+<p>The refactoring process is done by converting the algorithm into a more object-oriented approach, and separated the algorithm function into 4 components:</p>
+<ol>
+<li><strong>ActivityHandler (Facade)</strong> - the entry point of the algorithm, allowing the user to sends various <a href="https://www.w3.org/TR/activitypub/#client-to-server-interactions">Activity</a> with a simple function call</li>
+<li><strong>ActivityGenerator (Singleton)</strong> - responsibles for generating ActivityPub activity JSON object, provided relevant parameters. Currently support <a href="https://www.w3.org/TR/activitypub/#follow-activity-outbox">@Follow</a>, <a href="https://www.w3.org/TR/activitypub/#create-activity-outbox">@Create</a> and <a href="https://www.w3.org/TR/activitypub/#delete-activity-outbox">@Delete</a></li>
+<li><strong>ActivityRequest</strong> - responsibles for generating and organising information to ensure the structure of the HTTP request is correct, before sending</li>
+<li><strong>ActorInfoRetriever (Chain of Responsibility)</strong> - chain of information retrievers used to extra relevant information related to a particular actor to complete a request. Currently there are two retrievers implemented:
+<ul>
+<li><strong>ActorObjectInfoRetriever</strong> - given the username and domain, this retriever extract the url that leads to the actor object.</li>
+<li><strong>ActorInboxInfoRetriever</strong> - used to retrieve the inbox url of a particular ActivityPub actor. It would also extract the endpoint of that particular inbox url.</li>
+</ul>
+</li>
+</ol>
+<h2 id="usage">Using the codebase</h2>
+<p>To initialise the <code class="pretty-code">ActivityHandler</code>
+ you need to provide the constructor with:</p>
+<ol>
+<li><strong>actor_id</strong> - the url that leads to your actor object in JSON format.</li>
+<li><strong>private_key_path</strong> - the path that leads to where your private key is stored.</li>
+</ol>
+<h3 id="example-of-follow-activity">Example of Follow Activity</h3>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#080;font-weight:bold">from</span> <span style="color:#b06;font-weight:bold">activity_handler</span> <span style="color:#080;font-weight:bold">import</span> ActivityHandler
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>actor_id = <span style="color:#d20;background-color:#fff0f0">&#34;https://noah.netlify.app/noah/actor.json&#34;</span>
+</span></span><span style="display:flex;"><span>private_key_path = <span style="color:#d20;background-color:#fff0f0">&#34;...&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>webfinger = <span style="color:#d20;background-color:#fff0f0">&#34;@alice@mastodon.social&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>handler = ActivityHandler(
+</span></span><span style="display:flex;"><span>	actor_id=actor_id, 
+</span></span><span style="display:flex;"><span>	private_key_path=private_key_path
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>handler.send_follow_activity(webfinger=webfinger)
+</span></span></code></pre></div><h3 id="example-of-publish-activity">Example of Publish Activity</h3>
+<p>for publish activity, the <code class="pretty-code">ActivityHandler</code>
+ would first extract a list of followers based on your actor id, before sends out the activity out to each of them.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#080;font-weight:bold">from</span> <span style="color:#b06;font-weight:bold">activity_handler</span> <span style="color:#080;font-weight:bold">import</span> ActivityHandler
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>actor_id = <span style="color:#d20;background-color:#fff0f0">&#34;https://noah.netlify.app/noah/actor.json&#34;</span>
+</span></span><span style="display:flex;"><span>private_key_path = <span style="color:#d20;background-color:#fff0f0">&#34;...&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>post_id = <span style="color:#d20;background-color:#fff0f0">&#34;some_id&#34;</span>
+</span></span><span style="display:flex;"><span>content = <span style="color:#d20;background-color:#fff0f0">&#34;some_content&#34;</span>
+</span></span><span style="display:flex;"><span>public = <span style="color:#080;font-weight:bold">True</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>handler = ActivityHandler(
+</span></span><span style="display:flex;"><span>	actor_id=actor_id, 
+</span></span><span style="display:flex;"><span>	private_key_path=private_key_path
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>handler.send_publish_activity(
+</span></span><span style="display:flex;"><span>	post_id=post_id,
+</span></span><span style="display:flex;"><span>	content=content,
+</span></span><span style="display:flex;"><span>	public=public
+</span></span><span style="display:flex;"><span>)
+</span></span></code></pre></div><h3 id="example-of-delete-activity">Example of Delete Activity</h3>
+<p>If you wanted to delete a certain post, using the post id of that post. You can send a delete activity to all your followers.
+Please note that, once a post is deleted, you can no longer create a new post under the same post id. Considers changing the content or the visibility of the post instead of deleting.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#080;font-weight:bold">from</span> <span style="color:#b06;font-weight:bold">activity_handler</span> <span style="color:#080;font-weight:bold">import</span> ActivityHandler
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>actor_id = <span style="color:#d20;background-color:#fff0f0">&#34;https://noah.netlify.app/noah/actor.json&#34;</span>
+</span></span><span style="display:flex;"><span>private_key_path = <span style="color:#d20;background-color:#fff0f0">&#34;...&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>post_id = <span style="color:#d20;background-color:#fff0f0">&#34;some_id&#34;</span>
+</span></span><span style="display:flex;"><span>content = <span style="color:#d20;background-color:#fff0f0">&#34;some_content&#34;</span>
+</span></span><span style="display:flex;"><span>public = <span style="color:#080;font-weight:bold">True</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>handler = ActivityHandler(
+</span></span><span style="display:flex;"><span>    actor_id=actor_id, 
+</span></span><span style="display:flex;"><span>    private_key_path=private_key_path
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>handler.send_delete_activity(
+</span></span><span style="display:flex;"><span>    post_id=post_id,
+</span></span><span style="display:flex;"><span>)
+</span></span></code></pre></div><h2 id="activity_handler">ActivityHandler</h2>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#080;font-weight:bold">from</span> <span style="color:#b06;font-weight:bold">activity_request</span> <span style="color:#080;font-weight:bold">import</span> *
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">from</span> <span style="color:#b06;font-weight:bold">activity_generator</span> <span style="color:#080;font-weight:bold">import</span> ActivityGenerator
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">class</span> <span style="color:#b06;font-weight:bold">ActivityHandler</span>: 
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> __init__(self, actor_id, private_key_path):
+</span></span><span style="display:flex;"><span>        self.actor_id = actor_id
+</span></span><span style="display:flex;"><span>        self.generator = ActivityGenerator.get_instance()
+</span></span><span style="display:flex;"><span>        self.handler = ActivityPubRequestHandler(actor_id, private_key_path)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">send_follow_activity</span>(self, webfinger):
+</span></span><span style="display:flex;"><span>        activity_dto = self.generator.generate_follow_activity(self.actor_id, webfinger)
+</span></span><span style="display:flex;"><span>        response = self.handler.send_request(activity_dto)
+</span></span><span style="display:flex;"><span>        self.__interpret_response(activity=<span style="color:#d20;background-color:#fff0f0">&#39;Follow&#39;</span>, response=response)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">send_accept_activity</span>(self, webfinger):
+</span></span><span style="display:flex;"><span>        activity_dto = self.generator.generate_accept_activity(self.actor_id, webfinger)
+</span></span><span style="display:flex;"><span>        <span style="color:#038">print</span>(activity_dto.activity)
+</span></span><span style="display:flex;"><span>        response = self.handler.send_request(activity_dto)
+</span></span><span style="display:flex;"><span>        self.__interpret_response(activity=<span style="color:#d20;background-color:#fff0f0">&#39;Accept&#39;</span>, response=response)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">send_publish_activity</span>(self, post_id, content, public=<span style="color:#080;font-weight:bold">True</span>):
+</span></span><span style="display:flex;"><span>        activity_dto = self.generator.generate_publish_activity(self.actor_id, post_id, content, public)
+</span></span><span style="display:flex;"><span>        responses = self.__share_to_follower(activity_dto)
+</span></span><span style="display:flex;"><span>        self.__interpret_response(activity=<span style="color:#d20;background-color:#fff0f0">&#39;Publish&#39;</span>, response=responses)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">send_delete_activity</span>(self, post_id):
+</span></span><span style="display:flex;"><span>        activity_dto = self.generator.generate_delete_activity(self.actor_id, post_id)
+</span></span><span style="display:flex;"><span>        responses = self.__share_to_follower(activity_dto)
+</span></span><span style="display:flex;"><span>        self.__interpret_response(activity=<span style="color:#d20;background-color:#fff0f0">&#39;Delete&#39;</span>, response=responses)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">__share_to_follower</span>(self, activity_dto):
+</span></span><span style="display:flex;"><span>        responses = []
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">for</span> follower <span style="color:#080">in</span> activity_dto.followers:
+</span></span><span style="display:flex;"><span>            domain, inbox_url, inbox_endpoint = follower
+</span></span><span style="display:flex;"><span>            activity_dto.domain = domain
+</span></span><span style="display:flex;"><span>            activity_dto.inbox_url = inbox_url
+</span></span><span style="display:flex;"><span>            activity_dto.inbox_endpoint = inbox_endpoint
+</span></span><span style="display:flex;"><span>            responses.append(self.handler.send_request(activity_dto))
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> responses
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">__interpret_response</span>(self, activity, response):
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">if</span> activity <span style="color:#080">in</span> [<span style="color:#d20;background-color:#fff0f0">&#34;Follow&#34;</span>, <span style="color:#d20;background-color:#fff0f0">&#34;Accept&#34;</span>]:
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">if</span> response.ok:
+</span></span><span style="display:flex;"><span>                <span style="color:#038">print</span>(<span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#39;</span><span style="color:#04d;background-color:#fff0f0">\n</span><span style="color:#33b;background-color:#fff0f0">{</span>activity<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0"> activity successfully operated!</span><span style="color:#04d;background-color:#fff0f0">\n</span><span style="color:#d20;background-color:#fff0f0">&#39;</span>)
+</span></span><span style="display:flex;"><span>                <span style="color:#038">print</span>(response.text)
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">else</span>:
+</span></span><span style="display:flex;"><span>                <span style="color:#038">print</span>(<span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#39;</span><span style="color:#04d;background-color:#fff0f0">\n</span><span style="color:#d20;background-color:#fff0f0">Unsuccessful </span><span style="color:#33b;background-color:#fff0f0">{</span>activity<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0"> activity&#39;</span>)
+</span></span><span style="display:flex;"><span>                <span style="color:#038">print</span>(<span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#39;Status code: </span><span style="color:#33b;background-color:#fff0f0">{</span>response.status_code<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">&#39;</span>)
+</span></span><span style="display:flex;"><span>                <span style="color:#038">print</span>(<span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#39;Reason: </span><span style="color:#33b;background-color:#fff0f0">{</span>response.reason<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">&#39;</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">return</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        success = <span style="color:#00d;font-weight:bold">0</span>
+</span></span><span style="display:flex;"><span>        failure = <span style="color:#00d;font-weight:bold">0</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">for</span> item <span style="color:#080">in</span> response:
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">if</span> item.ok:
+</span></span><span style="display:flex;"><span>                success += <span style="color:#00d;font-weight:bold">1</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#038">print</span>(<span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#39;</span><span style="color:#04d;background-color:#fff0f0">\n</span><span style="color:#33b;background-color:#fff0f0">{</span>activity<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0"> activity successfully operated!</span><span style="color:#04d;background-color:#fff0f0">\n</span><span style="color:#d20;background-color:#fff0f0">&#39;</span>)
+</span></span><span style="display:flex;"><span>                <span style="color:#038">print</span>(item.text)
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">else</span>:
+</span></span><span style="display:flex;"><span>                failure += <span style="color:#00d;font-weight:bold">1</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#038">print</span>(<span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#39;</span><span style="color:#04d;background-color:#fff0f0">\n</span><span style="color:#d20;background-color:#fff0f0">Unsuccessful </span><span style="color:#33b;background-color:#fff0f0">{</span>activity<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0"> activity&#39;</span>)
+</span></span><span style="display:flex;"><span>                <span style="color:#038">print</span>(<span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#39;Status code: </span><span style="color:#33b;background-color:#fff0f0">{</span>item.status_code<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">&#39;</span>)
+</span></span><span style="display:flex;"><span>                <span style="color:#038">print</span>(<span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#39;Reason: </span><span style="color:#33b;background-color:#fff0f0">{</span>item.reason<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">&#39;</span>)
+</span></span><span style="display:flex;"><span>                <span style="color:#038">print</span>(item.text)
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>        total = success + failure
+</span></span><span style="display:flex;"><span>        <span style="color:#038">print</span>(<span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#34;</span><span style="color:#04d;background-color:#fff0f0">\n</span><span style="color:#d20;background-color:#fff0f0">Overall&#34;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#038">print</span>(<span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#34;Success: </span><span style="color:#33b;background-color:#fff0f0">{</span>success<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">&#34;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#038">print</span>(<span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#34;Failure: </span><span style="color:#33b;background-color:#fff0f0">{</span>failure<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">&#34;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#038">print</span>(<span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#34;Total: </span><span style="color:#33b;background-color:#fff0f0">{</span>total<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">&#34;</span>)
+</span></span></code></pre></div><h2 id="activity_generator">ActivityGenerator</h2>
+<p>Inside the generator class, we have also defined <code class="pretty-code">ActivityDTO</code>
+ that acts as a <a href="https://en.wikipedia.org/wiki/Data_transfer_object">Data Transfer Object (DTO)</a> passed onto <code class="pretty-code">ActivityRequest</code>
+</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#080;font-weight:bold">import</span> <span style="color:#b06;font-weight:bold">json</span>
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">from</span> <span style="color:#b06;font-weight:bold">datetime</span> <span style="color:#080;font-weight:bold">import</span> datetime, timezone 
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">from</span> <span style="color:#b06;font-weight:bold">actor_info_retriever</span> <span style="color:#080;font-weight:bold">import</span> *
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">class</span> <span style="color:#b06;font-weight:bold">ActivityDTO</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> __init__(self, 
+</span></span><span style="display:flex;"><span>        domain=<span style="color:#d20;background-color:#fff0f0">&#34;&#34;</span>, target_actor_id=<span style="color:#d20;background-color:#fff0f0">&#34;&#34;</span>,
+</span></span><span style="display:flex;"><span>        inbox_url=<span style="color:#d20;background-color:#fff0f0">&#34;&#34;</span>, inbox_endpoint=<span style="color:#d20;background-color:#fff0f0">&#34;&#34;</span>,
+</span></span><span style="display:flex;"><span>        activity=<span style="color:#d20;background-color:#fff0f0">&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    ):
+</span></span><span style="display:flex;"><span>        self.domain = domain
+</span></span><span style="display:flex;"><span>        self.target_actor_id = target_actor_id
+</span></span><span style="display:flex;"><span>        self.inbox_url = inbox_url
+</span></span><span style="display:flex;"><span>        self.inbox_endpoint = inbox_endpoint
+</span></span><span style="display:flex;"><span>        self.activity = activity
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">class</span> <span style="color:#b06;font-weight:bold">ActivityGenerator</span>: 
+</span></span><span style="display:flex;"><span>    instance = <span style="color:#080;font-weight:bold">None</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> __init__(self):
+</span></span><span style="display:flex;"><span>        self.__init_info_retriever()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">__init_info_retriever</span>(self):
+</span></span><span style="display:flex;"><span>        self.retriever = ActorObjectInfoRetriever()
+</span></span><span style="display:flex;"><span>        self.retriever.next = ActorInboxInfoRetriever()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">__get_webfinger_info</span>(self, username, domain):
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> self.retriever.get_info([username, domain])
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">get_instance</span>():
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">if</span> ActivityGenerator.instance == <span style="color:#080;font-weight:bold">None</span>: 
+</span></span><span style="display:flex;"><span>            ActivityGenerator.instance = ActivityGenerator()
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> ActivityGenerator.instance
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">__get_base_activity</span>(self, webfinger=<span style="color:#080;font-weight:bold">None</span>):
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">if</span> webfinger == <span style="color:#080;font-weight:bold">None</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">return</span> ActivityDTO()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        username, domain = webfinger.split(<span style="color:#d20;background-color:#fff0f0">&#34;@&#34;</span>)[<span style="color:#00d;font-weight:bold">1</span>:]
+</span></span><span style="display:flex;"><span>         <span style="color:#888"># Retrieve information from webfinger</span>
+</span></span><span style="display:flex;"><span>        target_actor_id, inbox_url, inbox_endpoint = self.__get_webfinger_info(username, domain)
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> ActivityDTO(domain, target_actor_id, inbox_url, inbox_endpoint)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">generate_follow_activity</span>(self, actor_id, webfinger):
+</span></span><span style="display:flex;"><span>        base = self.__get_base_activity(webfinger)
+</span></span><span style="display:flex;"><span>        base.activity = {
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;@context&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;https://www.w3.org/ns/activitystreams&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;type&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;Follow&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;actor&#34;</span>: actor_id,
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;object&#34;</span>: base.target_actor_id
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> base
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">generate_accept_activity</span>(self, actor_id, webfinger):
+</span></span><span style="display:flex;"><span>        base = self.__get_base_activity(webfinger)
+</span></span><span style="display:flex;"><span>        base.activity = {
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;@context&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;https://www.w3.org/ns/activitystreams&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;type&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;Accept&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;actor&#34;</span>: actor_id,
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;object&#34;</span>: base.target_actor_id
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> base
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">generate_publish_activity</span>(self, actor_id, post_id, content, public):
+</span></span><span style="display:flex;"><span>        base = self.__get_base_activity()
+</span></span><span style="display:flex;"><span>        date = datetime.now(timezone.utc).strftime(<span style="color:#d20;background-color:#fff0f0">&#39;</span><span style="color:#33b;background-color:#fff0f0">%a</span><span style="color:#d20;background-color:#fff0f0">, </span><span style="color:#33b;background-color:#fff0f0">%d</span><span style="color:#d20;background-color:#fff0f0"> %b %Y %H:%M:%S GMT&#39;</span>)
+</span></span><span style="display:flex;"><span>        follower_url = self.__get_follower_url(actor_id)
+</span></span><span style="display:flex;"><span>        activity = {
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;@context&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;https://www.w3.org/ns/activitystreams&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;type&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;Create&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;id&#34;</span>: post_id,
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;actor&#34;</span>: actor_id,
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;object&#34;</span>: {
+</span></span><span style="display:flex;"><span>                <span style="color:#d20;background-color:#fff0f0">&#34;id&#34;</span>: post_id,
+</span></span><span style="display:flex;"><span>                <span style="color:#d20;background-color:#fff0f0">&#34;type&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;Note&#34;</span>, 
+</span></span><span style="display:flex;"><span>                <span style="color:#d20;background-color:#fff0f0">&#34;published&#34;</span>: date,
+</span></span><span style="display:flex;"><span>                <span style="color:#d20;background-color:#fff0f0">&#34;content&#34;</span>: content,
+</span></span><span style="display:flex;"><span>                <span style="color:#d20;background-color:#fff0f0">&#34;attributedTo&#34;</span>: actor_id,
+</span></span><span style="display:flex;"><span>                <span style="color:#d20;background-color:#fff0f0">&#34;to&#34;</span>: [ follower_url],
+</span></span><span style="display:flex;"><span>                <span style="color:#d20;background-color:#fff0f0">&#34;cc&#34;</span>: [ follower_url]
+</span></span><span style="display:flex;"><span>            },
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;to&#34;</span>: [ follower_url],
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;cc&#34;</span>: [ follower_url]
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">if</span> public:
+</span></span><span style="display:flex;"><span>            public_flag = <span style="color:#d20;background-color:#fff0f0">&#34;https://www.w3.org/ns/activitystreams#Public&#34;</span>
+</span></span><span style="display:flex;"><span>            activity[<span style="color:#d20;background-color:#fff0f0">&#34;object&#34;</span>][<span style="color:#d20;background-color:#fff0f0">&#39;to&#39;</span>].append(public_flag)
+</span></span><span style="display:flex;"><span>            activity[<span style="color:#d20;background-color:#fff0f0">&#39;to&#39;</span>].append(public_flag)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        base.activity = activity
+</span></span><span style="display:flex;"><span>        self.__extract_followers(follower_url, base) 
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> base
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">generate_delete_activity</span>(self, actor_id, post_id):
+</span></span><span style="display:flex;"><span>        base = self.__get_base_activity()
+</span></span><span style="display:flex;"><span>        follower_url = self.__get_follower_url(actor_id)
+</span></span><span style="display:flex;"><span>        activity = {
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;@context&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;https://www.w3.org/ns/activitystreams&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;type&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;Delete&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;actor&#34;</span>: actor_id,
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;object&#34;</span>: post_id
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        base.activity = activity
+</span></span><span style="display:flex;"><span>        self.__extract_followers(follower_url, base) 
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> base
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#888"># Support functions</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">__extract_followers</span>(self, follower_url, activity_dto):
+</span></span><span style="display:flex;"><span>        follower_ids = self.__get_followers_id(follower_url)
+</span></span><span style="display:flex;"><span>        self.__clean_follower_ids(follower_ids)
+</span></span><span style="display:flex;"><span>        followers = []
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">for</span> follower_id <span style="color:#080">in</span> follower_ids:
+</span></span><span style="display:flex;"><span>            domain= follower_id.split(<span style="color:#d20;background-color:#fff0f0">&#34;/&#34;</span>)[<span style="color:#00d;font-weight:bold">2</span>]
+</span></span><span style="display:flex;"><span>            <span style="color:#888"># Getting inbox endpoint</span>
+</span></span><span style="display:flex;"><span>            inbox_endpoint = follower_id.split(<span style="color:#d20;background-color:#fff0f0">&#34;/&#34;</span>)[<span style="color:#00d;font-weight:bold">3</span>:]
+</span></span><span style="display:flex;"><span>            inbox_endpoint = <span style="color:#d20;background-color:#fff0f0">&#34;/&#34;</span> + <span style="color:#d20;background-color:#fff0f0">&#34;/&#34;</span>.join(inbox_endpoint)
+</span></span><span style="display:flex;"><span>            followers.append([domain, follower_id, inbox_endpoint])
+</span></span><span style="display:flex;"><span>        activity_dto.followers = followers
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">__get_follower_url</span>(self, actor_id): 
+</span></span><span style="display:flex;"><span>        response = requests.get(actor_id, headers={ <span style="color:#d20;background-color:#fff0f0">&#34;accept&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;application/activity+json&#34;</span>})
+</span></span><span style="display:flex;"><span>        data = json.loads(response.text)
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> data[<span style="color:#d20;background-color:#fff0f0">&#39;followers&#39;</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">__clean_follower_ids</span>(self, follower_ids):
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">for</span> i, follower_id <span style="color:#080">in</span> <span style="color:#038">enumerate</span>(follower_ids):
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">if</span> <span style="color:#d20;background-color:#fff0f0">&#34;inbox&#34;</span> <span style="color:#080">not</span> <span style="color:#080">in</span> follower_id:
+</span></span><span style="display:flex;"><span>                <span style="color:#080;font-weight:bold">if</span> <span style="color:#d20;background-color:#fff0f0">&#34;/&#34;</span> != follower_id[-<span style="color:#00d;font-weight:bold">1</span>]:
+</span></span><span style="display:flex;"><span>                    follower_id += <span style="color:#d20;background-color:#fff0f0">&#34;/&#34;</span>
+</span></span><span style="display:flex;"><span>                follower_id += <span style="color:#d20;background-color:#fff0f0">&#34;inbox&#34;</span>
+</span></span><span style="display:flex;"><span>                follower_ids[i] = follower_id
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">__get_followers_id</span>(self, follower_url):
+</span></span><span style="display:flex;"><span>        response = requests.get(follower_url, headers={ <span style="color:#d20;background-color:#fff0f0">&#34;accept&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;application/activity+json&#34;</span>})     
+</span></span><span style="display:flex;"><span>        data = json.loads(response.text)
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">if</span> <span style="color:#d20;background-color:#fff0f0">&#34;orderedItems&#34;</span> <span style="color:#080">in</span> data:
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">return</span> self.__get_follower_from_ordered_items(data)
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> self.__get_follower_from_ext_urls(data)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#888"># Simple case</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">__get_follower_from_ordered_items</span>(self, data): 
+</span></span><span style="display:flex;"><span>        items = data[<span style="color:#d20;background-color:#fff0f0">&#39;orderedItems&#39;</span>]
+</span></span><span style="display:flex;"><span>        follower_ids = []
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">for</span> item <span style="color:#080">in</span> items: 
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">if</span> <span style="color:#038">type</span>(item) == <span style="color:#038">str</span>:
+</span></span><span style="display:flex;"><span>                follower_ids.append(item)
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">elif</span> <span style="color:#038">type</span>(item) == <span style="color:#038">dict</span>: 
+</span></span><span style="display:flex;"><span>                follower_ids.append(item[<span style="color:#d20;background-color:#fff0f0">&#39;id&#39;</span>])
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> items
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">__get_follower_from_ext_urls</span>(self, data):
+</span></span><span style="display:flex;"><span>        excluded_keys = [ <span style="color:#d20;background-color:#fff0f0">&#34;@context&#34;</span>, <span style="color:#d20;background-color:#fff0f0">&#34;id&#34;</span>, <span style="color:#d20;background-color:#fff0f0">&#34;type&#34;</span>, <span style="color:#d20;background-color:#fff0f0">&#34;totalItems&#34;</span>] 
+</span></span><span style="display:flex;"><span>        urls = []
+</span></span><span style="display:flex;"><span>        <span style="color:#888"># Getting relevant urls</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">for</span> key <span style="color:#080">in</span> data:
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">if</span> key <span style="color:#080">not</span> <span style="color:#080">in</span> excluded_keys:
+</span></span><span style="display:flex;"><span>                urls.append(data[key])
+</span></span><span style="display:flex;"><span>     
+</span></span><span style="display:flex;"><span>        total = <span style="color:#080;font-weight:bold">None</span>
+</span></span><span style="display:flex;"><span>        follower_ids = [] 
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">while</span> <span style="color:#080;font-weight:bold">True</span>:
+</span></span><span style="display:flex;"><span>            url = urls.pop(<span style="color:#00d;font-weight:bold">0</span>)
+</span></span><span style="display:flex;"><span>            response = requests.get(url, headers={ <span style="color:#d20;background-color:#fff0f0">&#34;accept&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;application/activity+json&#34;</span>})
+</span></span><span style="display:flex;"><span>            json_data = json.loads(response.text)
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            <span style="color:#888"># Registers total Items</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">if</span> total == <span style="color:#080;font-weight:bold">None</span>: 
+</span></span><span style="display:flex;"><span>                total = json_data[<span style="color:#d20;background-color:#fff0f0">&#39;totalItems&#39;</span>]
+</span></span><span style="display:flex;"><span>                
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">if</span> <span style="color:#d20;background-color:#fff0f0">&#34;orderedItems&#34;</span> <span style="color:#080">not</span> <span style="color:#080">in</span> json_data.keys(): 
+</span></span><span style="display:flex;"><span>                <span style="color:#080;font-weight:bold">break</span> 
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">for</span> item <span style="color:#080">in</span> json_data[<span style="color:#d20;background-color:#fff0f0">&#39;orderedItems&#39;</span>]:
+</span></span><span style="display:flex;"><span>                <span style="color:#080;font-weight:bold">if</span> <span style="color:#038">type</span>(item) == <span style="color:#038">str</span>:
+</span></span><span style="display:flex;"><span>                    follower_ids.append(item)
+</span></span><span style="display:flex;"><span>                <span style="color:#080;font-weight:bold">elif</span> <span style="color:#038">type</span>(item) == <span style="color:#038">dict</span>: 
+</span></span><span style="display:flex;"><span>                    follower_ids.append(item[<span style="color:#d20;background-color:#fff0f0">&#39;id&#39;</span>])
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">if</span> <span style="color:#038">len</span>(follower_ids) &gt;= total: 
+</span></span><span style="display:flex;"><span>                <span style="color:#080;font-weight:bold">break</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#888"># Registered the next urls</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">if</span> <span style="color:#d20;background-color:#fff0f0">&#34;next&#34;</span> <span style="color:#080">in</span> json_data.keys():
+</span></span><span style="display:flex;"><span>                urls.append(json_data[<span style="color:#d20;background-color:#fff0f0">&#34;next&#34;</span>])
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">elif</span> <span style="color:#d20;background-color:#fff0f0">&#34;last&#34;</span> <span style="color:#080">in</span> json_data.keys():
+</span></span><span style="display:flex;"><span>                urls.append(json_data[<span style="color:#d20;background-color:#fff0f0">&#34;last&#34;</span>])
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">else</span>: 
+</span></span><span style="display:flex;"><span>                <span style="color:#080;font-weight:bold">break</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> follower_ids
+</span></span></code></pre></div><h2 id="activity_request">ActivityRequest</h2>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#080;font-weight:bold">import</span> <span style="color:#b06;font-weight:bold">requests</span>
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">import</span> <span style="color:#b06;font-weight:bold">base64</span>
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">import</span> <span style="color:#b06;font-weight:bold">json</span>
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">import</span> <span style="color:#b06;font-weight:bold">hashlib</span>
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">from</span> <span style="color:#b06;font-weight:bold">datetime</span> <span style="color:#080;font-weight:bold">import</span> datetime, timezone
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">from</span> <span style="color:#b06;font-weight:bold">cryptography.hazmat.primitives.serialization</span> <span style="color:#080;font-weight:bold">import</span> load_pem_private_key
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">from</span> <span style="color:#b06;font-weight:bold">cryptography.hazmat.primitives</span> <span style="color:#080;font-weight:bold">import</span> hashes
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">from</span> <span style="color:#b06;font-weight:bold">cryptography.hazmat.primitives.asymmetric</span> <span style="color:#080;font-weight:bold">import</span> padding
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">from</span> <span style="color:#b06;font-weight:bold">actor_info_retriever</span> <span style="color:#080;font-weight:bold">import</span> *    
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">class</span> <span style="color:#b06;font-weight:bold">ActivityPubRequestHandler</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> __init__(self, actor_id, private_key_path):
+</span></span><span style="display:flex;"><span>        self.actor_id = actor_id
+</span></span><span style="display:flex;"><span>        self.private_key_path = private_key_path
+</span></span><span style="display:flex;"><span>        self.private_key = self.__load_private_key()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">__load_private_key</span>(self) -&gt; <span style="color:#080;font-weight:bold">None</span>:
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">with</span> <span style="color:#038">open</span>(self.private_key_path, <span style="color:#d20;background-color:#fff0f0">&#34;rb&#34;</span>) <span style="color:#080;font-weight:bold">as</span> key_file:
+</span></span><span style="display:flex;"><span>            private_key = load_pem_private_key(key_file.read(), password=<span style="color:#080;font-weight:bold">None</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> private_key
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">send_request</span>(self, activity_dto):
+</span></span><span style="display:flex;"><span>        <span style="color:#888"># Gather information</span>
+</span></span><span style="display:flex;"><span>        domain = activity_dto.domain
+</span></span><span style="display:flex;"><span>        inbox_url = activity_dto.inbox_url
+</span></span><span style="display:flex;"><span>        inbox_endpoint = activity_dto.inbox_endpoint
+</span></span><span style="display:flex;"><span>        activity = activity_dto.activity
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#888"># Convert Activity to JSON </span>
+</span></span><span style="display:flex;"><span>        activity = json.dumps(activity)
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#888"># Generates Headers</span>
+</span></span><span style="display:flex;"><span>        headers = self.__generate_headers(domain, activity, inbox_endpoint)
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> self.__send_post_request(inbox_url, headers, activity)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#888"># Support functions for send_activity</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">__generate_headers</span>(self, domain, activity, inbox_endpoint): 
+</span></span><span style="display:flex;"><span>        headers = { <span style="color:#d20;background-color:#fff0f0">&#34;Content-Type&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;application/activity+json&#34;</span>}
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>        headers[<span style="color:#d20;background-color:#fff0f0">&#39;Host&#39;</span>] = domain
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        date = datetime.now(timezone.utc).strftime(<span style="color:#d20;background-color:#fff0f0">&#39;</span><span style="color:#33b;background-color:#fff0f0">%a</span><span style="color:#d20;background-color:#fff0f0">, </span><span style="color:#33b;background-color:#fff0f0">%d</span><span style="color:#d20;background-color:#fff0f0"> %b %Y %H:%M:%S GMT&#39;</span>)
+</span></span><span style="display:flex;"><span>        headers[<span style="color:#d20;background-color:#fff0f0">&#39;Date&#39;</span>] = date
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        digest = self.__generate_digest(activity)
+</span></span><span style="display:flex;"><span>        headers[<span style="color:#d20;background-color:#fff0f0">&#39;Digest&#39;</span>] = digest
+</span></span><span style="display:flex;"><span>         
+</span></span><span style="display:flex;"><span>        headers[<span style="color:#d20;background-color:#fff0f0">&#39;Signature&#39;</span>] = self.__generate_signature(headers, inbox_endpoint)
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> headers
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">__generate_digest</span>(self, activity: <span style="color:#038">str</span>) -&gt; <span style="color:#038">str</span>:
+</span></span><span style="display:flex;"><span>        sha256 = hashlib.sha256()
+</span></span><span style="display:flex;"><span>        sha256.update(activity.encode(<span style="color:#d20;background-color:#fff0f0">&#39;utf-8&#39;</span>))
+</span></span><span style="display:flex;"><span>        digest = base64.b64encode(sha256.digest()).decode(<span style="color:#d20;background-color:#fff0f0">&#39;utf-8&#39;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> <span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#34;SHA-256=</span><span style="color:#33b;background-color:#fff0f0">{</span>digest<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">&#34;</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">__generate_signature</span>(self, headers, inbox_endpoint):
+</span></span><span style="display:flex;"><span>        sign_string = <span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#39;(request-target): post </span><span style="color:#33b;background-color:#fff0f0">{</span>inbox_endpoint<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#04d;background-color:#fff0f0">\n</span><span style="color:#d20;background-color:#fff0f0">&#39;</span>
+</span></span><span style="display:flex;"><span>        sign_string += <span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#39;host: </span><span style="color:#33b;background-color:#fff0f0">{</span>headers[<span style="color:#d20;background-color:#fff0f0">&#34;Host&#34;</span>]<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#04d;background-color:#fff0f0">\n</span><span style="color:#d20;background-color:#fff0f0">&#39;</span>
+</span></span><span style="display:flex;"><span>        sign_string += <span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#39;date: </span><span style="color:#33b;background-color:#fff0f0">{</span>headers[<span style="color:#d20;background-color:#fff0f0">&#34;Date&#34;</span>]<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#04d;background-color:#fff0f0">\n</span><span style="color:#d20;background-color:#fff0f0">&#39;</span>
+</span></span><span style="display:flex;"><span>        sign_string += <span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#39;digest: </span><span style="color:#33b;background-color:#fff0f0">{</span>headers[<span style="color:#d20;background-color:#fff0f0">&#34;Digest&#34;</span>]<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">&#39;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#038">print</span>(sign_string)
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        signature = self.private_key.sign(
+</span></span><span style="display:flex;"><span>            sign_string.encode(<span style="color:#d20;background-color:#fff0f0">&#34;utf-8&#34;</span>),
+</span></span><span style="display:flex;"><span>            padding.PKCS1v15(),
+</span></span><span style="display:flex;"><span>            hashes.SHA256()
+</span></span><span style="display:flex;"><span>        )
+</span></span><span style="display:flex;"><span>        signature = base64.b64encode(signature).decode(<span style="color:#d20;background-color:#fff0f0">&#39;utf-8&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        key_id = <span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#34;</span><span style="color:#33b;background-color:#fff0f0">{</span>self.actor_id<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">#main-key&#34;</span>
+</span></span><span style="display:flex;"><span>        signature_header = (
+</span></span><span style="display:flex;"><span>        <span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#39;keyId=&#34;</span><span style="color:#33b;background-color:#fff0f0">{</span>key_id<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">&#34;,&#39;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#39;headers=&#34;(request-target) host date digest&#34;,&#39;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#39;signature=&#34;</span><span style="color:#33b;background-color:#fff0f0">{</span>signature<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">&#34;,&#39;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#39;algorithm=&#34;rsa-sha256&#34;&#39;</span>
+</span></span><span style="display:flex;"><span>        )
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> signature_header
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">__send_post_request</span>(self, url, headers, activity):
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> requests.post(url, headers=headers, data=activity)
+</span></span></code></pre></div><h2 id="actor_info_retriever">ActorInfoRetriever</h2>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#080;font-weight:bold">import</span> <span style="color:#b06;font-weight:bold">requests</span> 
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">import</span> <span style="color:#b06;font-weight:bold">json</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">class</span> <span style="color:#b06;font-weight:bold">ActorInfoRetriever</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> __init__(self, <span style="color:#038">next</span>=<span style="color:#080;font-weight:bold">None</span>):
+</span></span><span style="display:flex;"><span>        self.next = <span style="color:#038">next</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">set_next</span>(self, <span style="color:#038">next</span>): 
+</span></span><span style="display:flex;"><span>        self.next = <span style="color:#038">next</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">get_info</span>(self, info):
+</span></span><span style="display:flex;"><span>        value = self.retrieve(info) 
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">if</span> <span style="color:#038">len</span>(value) == <span style="color:#00d;font-weight:bold">0</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">return</span> []
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> value + self.__get_next(value[-<span style="color:#00d;font-weight:bold">1</span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">retrieve</span>(self, info):
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> []
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">__get_next</span>(self, info ):
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">if</span> self.next == <span style="color:#080;font-weight:bold">None</span>: 
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">return</span> [] 
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> self.next.get_info(info)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">send_get_request</span>(self, url=<span style="color:#d20;background-color:#fff0f0">&#34;&#34;</span>, headers={}, params={}): 
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">if</span> url == <span style="color:#d20;background-color:#fff0f0">&#34;&#34;</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">return</span> <span style="color:#080;font-weight:bold">None</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">if</span> headers == {}:
+</span></span><span style="display:flex;"><span>            headers = { <span style="color:#d20;background-color:#fff0f0">&#34;accept&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;application/activity+json&#34;</span> }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> requests.get(url, headers=headers, params=params)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">class</span> <span style="color:#b06;font-weight:bold">ActorObjectInfoRetriever</span>(ActorInfoRetriever):
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">retrieve</span>(self, info):
+</span></span><span style="display:flex;"><span>        username, domain = info
+</span></span><span style="display:flex;"><span>        url = <span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#39;https://</span><span style="color:#33b;background-color:#fff0f0">{</span>domain<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">/.well-known/webfinger&#39;</span>
+</span></span><span style="display:flex;"><span>        params = { <span style="color:#d20;background-color:#fff0f0">&#34;resource&#34;</span>: <span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#34;acct:</span><span style="color:#33b;background-color:#fff0f0">{</span>username<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">@</span><span style="color:#33b;background-color:#fff0f0">{</span>domain<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">&#34;</span>}
+</span></span><span style="display:flex;"><span>        response = self.send_get_request(url, params=params)
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">if</span> <span style="color:#080">not</span> response.ok:
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">return</span> [ <span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#34;Unable to retrieve actor object: </span><span style="color:#33b;background-color:#fff0f0">{</span>response.reason<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">&#34;</span>]
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        data = json.loads(response.text)
+</span></span><span style="display:flex;"><span>        links = data[<span style="color:#d20;background-color:#fff0f0">&#39;links&#39;</span>]
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">for</span> link <span style="color:#080">in</span> links:
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">if</span> link[<span style="color:#d20;background-color:#fff0f0">&#39;rel&#39;</span>] == <span style="color:#d20;background-color:#fff0f0">&#34;self&#34;</span>:
+</span></span><span style="display:flex;"><span>                <span style="color:#080;font-weight:bold">return</span> [ link[<span style="color:#d20;background-color:#fff0f0">&#39;href&#39;</span>]]
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">class</span> <span style="color:#b06;font-weight:bold">ActorInboxInfoRetriever</span>(ActorInfoRetriever):
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">retrieve</span>(self, info):
+</span></span><span style="display:flex;"><span>        response = self.send_get_request(info)
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">if</span> <span style="color:#080">not</span> response.ok:
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">return</span> [ <span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#34;Unable to retrieve inbox: </span><span style="color:#33b;background-color:#fff0f0">{</span>response.reason<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">&#34;</span>]
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>        data = json.loads(response.text)
+</span></span><span style="display:flex;"><span>        inbox = data[<span style="color:#d20;background-color:#fff0f0">&#39;inbox&#39;</span>]
+</span></span><span style="display:flex;"><span>        inbox_endpoint = inbox.split(<span style="color:#d20;background-color:#fff0f0">&#34;/&#34;</span>)[<span style="color:#00d;font-weight:bold">3</span>:]
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> [ inbox, <span style="color:#d20;background-color:#fff0f0">&#34;/&#34;</span> + <span style="color:#d20;background-color:#fff0f0">&#34;/&#34;</span>.join(inbox_endpoint)]
+</span></span></code></pre></div><h2 id="full_codebase">Combined Codebase</h2>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#080;font-weight:bold">import</span> <span style="color:#b06;font-weight:bold">requests</span>
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">import</span> <span style="color:#b06;font-weight:bold">json</span>
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">import</span> <span style="color:#b06;font-weight:bold">base64</span>
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">import</span> <span style="color:#b06;font-weight:bold">hashlib</span>
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">from</span> <span style="color:#b06;font-weight:bold">datetime</span> <span style="color:#080;font-weight:bold">import</span> datetime, timezone
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">from</span> <span style="color:#b06;font-weight:bold">cryptography.hazmat.primitives.serialization</span> <span style="color:#080;font-weight:bold">import</span> load_pem_private_key
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">from</span> <span style="color:#b06;font-weight:bold">cryptography.hazmat.primitives</span> <span style="color:#080;font-weight:bold">import</span> hashes
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">from</span> <span style="color:#b06;font-weight:bold">cryptography.hazmat.primitives.asymmetric</span> <span style="color:#080;font-weight:bold">import</span> padding
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#888"># Actor Info Retriever</span>
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">class</span> <span style="color:#b06;font-weight:bold">ActorInfoRetriever</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> __init__(self, <span style="color:#038">next</span>=<span style="color:#080;font-weight:bold">None</span>):
+</span></span><span style="display:flex;"><span>        self.next = <span style="color:#038">next</span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">set_next</span>(self, <span style="color:#038">next</span>): 
+</span></span><span style="display:flex;"><span>        self.next = <span style="color:#038">next</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">get_info</span>(self, info):
+</span></span><span style="display:flex;"><span>        value = self.retrieve(info) 
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">if</span> <span style="color:#080">not</span> value:
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">return</span> []
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> value + self.__get_next(value[-<span style="color:#00d;font-weight:bold">1</span>])
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">retrieve</span>(self, info):
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> []
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">__get_next</span>(self, info):
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">if</span> self.next <span style="color:#080">is</span> <span style="color:#080;font-weight:bold">None</span>: 
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">return</span> [] 
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> self.next.get_info(info)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">send_get_request</span>(self, url=<span style="color:#d20;background-color:#fff0f0">&#34;&#34;</span>, headers=<span style="color:#080;font-weight:bold">None</span>, params=<span style="color:#080;font-weight:bold">None</span>): 
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">if</span> url == <span style="color:#d20;background-color:#fff0f0">&#34;&#34;</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">return</span> <span style="color:#080;font-weight:bold">None</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        headers = headers <span style="color:#080">or</span> {<span style="color:#d20;background-color:#fff0f0">&#34;accept&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;application/activity+json&#34;</span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> requests.get(url, headers=headers, params=params)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">class</span> <span style="color:#b06;font-weight:bold">ActorObjectInfoRetriever</span>(ActorInfoRetriever):
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">retrieve</span>(self, info):
+</span></span><span style="display:flex;"><span>        username, domain = info
+</span></span><span style="display:flex;"><span>        url = <span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#39;https://</span><span style="color:#33b;background-color:#fff0f0">{</span>domain<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">/.well-known/webfinger&#39;</span>
+</span></span><span style="display:flex;"><span>        params = {<span style="color:#d20;background-color:#fff0f0">&#34;resource&#34;</span>: <span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#34;acct:</span><span style="color:#33b;background-color:#fff0f0">{</span>username<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">@</span><span style="color:#33b;background-color:#fff0f0">{</span>domain<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">&#34;</span>}
+</span></span><span style="display:flex;"><span>        response = self.send_get_request(url, params=params)
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">if</span> <span style="color:#080">not</span> response.ok:
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">return</span> [<span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#34;Unable to retrieve actor object: </span><span style="color:#33b;background-color:#fff0f0">{</span>response.reason<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">&#34;</span>]
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        data = json.loads(response.text)
+</span></span><span style="display:flex;"><span>        links = data[<span style="color:#d20;background-color:#fff0f0">&#39;links&#39;</span>]
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">for</span> link <span style="color:#080">in</span> links:
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">if</span> link[<span style="color:#d20;background-color:#fff0f0">&#39;rel&#39;</span>] == <span style="color:#d20;background-color:#fff0f0">&#34;self&#34;</span>:
+</span></span><span style="display:flex;"><span>                <span style="color:#080;font-weight:bold">return</span> [link[<span style="color:#d20;background-color:#fff0f0">&#39;href&#39;</span>]]
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">class</span> <span style="color:#b06;font-weight:bold">ActorInboxInfoRetriever</span>(ActorInfoRetriever):
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">retrieve</span>(self, info):
+</span></span><span style="display:flex;"><span>        response = self.send_get_request(info)
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">if</span> <span style="color:#080">not</span> response.ok:
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">return</span> [<span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#34;Unable to retrieve inbox: </span><span style="color:#33b;background-color:#fff0f0">{</span>response.reason<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">&#34;</span>]
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>        data = json.loads(response.text)
+</span></span><span style="display:flex;"><span>        inbox = data[<span style="color:#d20;background-color:#fff0f0">&#39;inbox&#39;</span>]
+</span></span><span style="display:flex;"><span>        inbox_endpoint = inbox.split(<span style="color:#d20;background-color:#fff0f0">&#34;/&#34;</span>)[<span style="color:#00d;font-weight:bold">3</span>:]
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> [inbox, <span style="color:#d20;background-color:#fff0f0">&#34;/&#34;</span> + <span style="color:#d20;background-color:#fff0f0">&#34;/&#34;</span>.join(inbox_endpoint)]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#888"># Activity Request</span>
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">class</span> <span style="color:#b06;font-weight:bold">ActivityPubRequestHandler</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> __init__(self, actor_id, private_key_path):
+</span></span><span style="display:flex;"><span>        self.actor_id = actor_id
+</span></span><span style="display:flex;"><span>        self.private_key_path = private_key_path
+</span></span><span style="display:flex;"><span>        self.private_key = self.__load_private_key()
+</span></span><span style="display:flex;"><span>        self.__init_info_retriever()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">__load_private_key</span>(self):
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">with</span> <span style="color:#038">open</span>(self.private_key_path, <span style="color:#d20;background-color:#fff0f0">&#34;rb&#34;</span>) <span style="color:#080;font-weight:bold">as</span> key_file:
+</span></span><span style="display:flex;"><span>            private_key = load_pem_private_key(key_file.read(), password=<span style="color:#080;font-weight:bold">None</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> private_key
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">__init_info_retriever</span>(self):
+</span></span><span style="display:flex;"><span>        self.retriever = ActorObjectInfoRetriever()
+</span></span><span style="display:flex;"><span>        self.retriever.set_next(ActorInboxInfoRetriever())
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">send_request</span>(self, activity_dto):
+</span></span><span style="display:flex;"><span>        domain = activity_dto.domain
+</span></span><span style="display:flex;"><span>        inbox_url = activity_dto.inbox_url
+</span></span><span style="display:flex;"><span>        inbox_endpoint = activity_dto.inbox_endpoint
+</span></span><span style="display:flex;"><span>        activity = json.dumps(activity_dto.activity)
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        headers = self.__generate_headers(domain, activity, inbox_endpoint)
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> self.__send_post_request(inbox_url, headers, activity)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">__generate_headers</span>(self, domain, activity, inbox_endpoint): 
+</span></span><span style="display:flex;"><span>        headers = {
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;Content-Type&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;application/activity+json&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;Host&#34;</span>: domain,
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;Date&#34;</span>: datetime.now(timezone.utc).strftime(<span style="color:#d20;background-color:#fff0f0">&#39;</span><span style="color:#33b;background-color:#fff0f0">%a</span><span style="color:#d20;background-color:#fff0f0">, </span><span style="color:#33b;background-color:#fff0f0">%d</span><span style="color:#d20;background-color:#fff0f0"> %b %Y %H:%M:%S GMT&#39;</span>),
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;Digest&#34;</span>: self.__generate_digest(activity)
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        headers[<span style="color:#d20;background-color:#fff0f0">&#39;Signature&#39;</span>] = self.__generate_signature(headers, inbox_endpoint)
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> headers
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">__generate_digest</span>(self, activity):
+</span></span><span style="display:flex;"><span>        sha256 = hashlib.sha256()
+</span></span><span style="display:flex;"><span>        sha256.update(activity.encode(<span style="color:#d20;background-color:#fff0f0">&#39;utf-8&#39;</span>))
+</span></span><span style="display:flex;"><span>        digest = base64.b64encode(sha256.digest()).decode(<span style="color:#d20;background-color:#fff0f0">&#39;utf-8&#39;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> <span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#34;SHA-256=</span><span style="color:#33b;background-color:#fff0f0">{</span>digest<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">&#34;</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">__generate_signature</span>(self, headers, inbox_endpoint):
+</span></span><span style="display:flex;"><span>        sign_string = (
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#39;(request-target): post </span><span style="color:#33b;background-color:#fff0f0">{</span>inbox_endpoint<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#04d;background-color:#fff0f0">\n</span><span style="color:#d20;background-color:#fff0f0">&#39;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#39;host: </span><span style="color:#33b;background-color:#fff0f0">{</span>headers[<span style="color:#d20;background-color:#fff0f0">&#34;Host&#34;</span>]<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#04d;background-color:#fff0f0">\n</span><span style="color:#d20;background-color:#fff0f0">&#39;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#39;date: </span><span style="color:#33b;background-color:#fff0f0">{</span>headers[<span style="color:#d20;background-color:#fff0f0">&#34;Date&#34;</span>]<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#04d;background-color:#fff0f0">\n</span><span style="color:#d20;background-color:#fff0f0">&#39;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#39;digest: </span><span style="color:#33b;background-color:#fff0f0">{</span>headers[<span style="color:#d20;background-color:#fff0f0">&#34;Digest&#34;</span>]<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">&#39;</span>
+</span></span><span style="display:flex;"><span>        )
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        signature = self.private_key.sign(
+</span></span><span style="display:flex;"><span>            sign_string.encode(<span style="color:#d20;background-color:#fff0f0">&#34;utf-8&#34;</span>),
+</span></span><span style="display:flex;"><span>            padding.PKCS1v15(),
+</span></span><span style="display:flex;"><span>            hashes.SHA256()
+</span></span><span style="display:flex;"><span>        )
+</span></span><span style="display:flex;"><span>        signature = base64.b64encode(signature).decode(<span style="color:#d20;background-color:#fff0f0">&#39;utf-8&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        key_id = <span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#34;</span><span style="color:#33b;background-color:#fff0f0">{</span>self.actor_id<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">#main-key&#34;</span>
+</span></span><span style="display:flex;"><span>        signature_header = (
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#39;keyId=&#34;</span><span style="color:#33b;background-color:#fff0f0">{</span>key_id<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">&#34;,&#39;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#39;headers=&#34;(request-target) host date digest&#34;,&#39;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#39;signature=&#34;</span><span style="color:#33b;background-color:#fff0f0">{</span>signature<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">&#34;,&#39;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#39;algorithm=&#34;rsa-sha256&#34;&#39;</span>
+</span></span><span style="display:flex;"><span>        )
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> signature_header
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">__send_post_request</span>(self, url, headers, activity):
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> requests.post(url, headers=headers, data=activity)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#888"># Activity Generator</span>
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">class</span> <span style="color:#b06;font-weight:bold">ActivityDTO</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> __init__(self, 
+</span></span><span style="display:flex;"><span>        domain=<span style="color:#d20;background-color:#fff0f0">&#34;&#34;</span>, target_actor_id=<span style="color:#d20;background-color:#fff0f0">&#34;&#34;</span>,
+</span></span><span style="display:flex;"><span>        inbox_url=<span style="color:#d20;background-color:#fff0f0">&#34;&#34;</span>, inbox_endpoint=<span style="color:#d20;background-color:#fff0f0">&#34;&#34;</span>,
+</span></span><span style="display:flex;"><span>        activity=<span style="color:#d20;background-color:#fff0f0">&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>    ):
+</span></span><span style="display:flex;"><span>        self.domain = domain
+</span></span><span style="display:flex;"><span>        self.target_actor_id = target_actor_id
+</span></span><span style="display:flex;"><span>        self.inbox_url = inbox_url
+</span></span><span style="display:flex;"><span>        self.inbox_endpoint = inbox_endpoint
+</span></span><span style="display:flex;"><span>        self.activity = activity
+</span></span><span style="display:flex;"><span> 
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">class</span> <span style="color:#b06;font-weight:bold">ActivityGenerator</span>: 
+</span></span><span style="display:flex;"><span>    instance = <span style="color:#080;font-weight:bold">None</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> __init__(self):
+</span></span><span style="display:flex;"><span>        self.__init_info_retriever()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">__init_info_retriever</span>(self):
+</span></span><span style="display:flex;"><span>        self.retriever = ActorObjectInfoRetriever()
+</span></span><span style="display:flex;"><span>        self.retriever.next = ActorInboxInfoRetriever()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">__get_webfinger_info</span>(self, username, domain):
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> self.retriever.get_info([username, domain])
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">get_instance</span>():
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">if</span> ActivityGenerator.instance == <span style="color:#080;font-weight:bold">None</span>: 
+</span></span><span style="display:flex;"><span>            ActivityGenerator.instance = ActivityGenerator()
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> ActivityGenerator.instance
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">__get_base_activity</span>(self, webfinger=<span style="color:#080;font-weight:bold">None</span>):
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">if</span> webfinger == <span style="color:#080;font-weight:bold">None</span>:
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">return</span> ActivityDTO()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        username, domain = webfinger.split(<span style="color:#d20;background-color:#fff0f0">&#34;@&#34;</span>)[<span style="color:#00d;font-weight:bold">1</span>:]
+</span></span><span style="display:flex;"><span>         <span style="color:#888"># Retrieve information from webfinger</span>
+</span></span><span style="display:flex;"><span>        target_actor_id, inbox_url, inbox_endpoint = self.__get_webfinger_info(username, domain)
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> ActivityDTO(domain, target_actor_id, inbox_url, inbox_endpoint)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">generate_follow_activity</span>(self, actor_id, webfinger):
+</span></span><span style="display:flex;"><span>        base = self.__get_base_activity(webfinger)
+</span></span><span style="display:flex;"><span>        base.activity = {
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;@context&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;https://www.w3.org/ns/activitystreams&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;type&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;Follow&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;actor&#34;</span>: actor_id,
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;object&#34;</span>: base.target_actor_id
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> base
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">generate_accept_activity</span>(self, actor_id, webfinger):
+</span></span><span style="display:flex;"><span>        base = self.__get_base_activity(webfinger)
+</span></span><span style="display:flex;"><span>        base.activity = {
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;@context&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;https://www.w3.org/ns/activitystreams&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;type&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;Accept&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;actor&#34;</span>: actor_id,
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;object&#34;</span>: base.target_actor_id
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> base
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">generate_publish_activity</span>(self, actor_id, post_id, content, public):
+</span></span><span style="display:flex;"><span>        base = self.__get_base_activity()
+</span></span><span style="display:flex;"><span>        date = datetime.now(timezone.utc).strftime(<span style="color:#d20;background-color:#fff0f0">&#39;</span><span style="color:#33b;background-color:#fff0f0">%a</span><span style="color:#d20;background-color:#fff0f0">, </span><span style="color:#33b;background-color:#fff0f0">%d</span><span style="color:#d20;background-color:#fff0f0"> %b %Y %H:%M:%S GMT&#39;</span>)
+</span></span><span style="display:flex;"><span>        follower_url = self.__get_follower_url(actor_id)
+</span></span><span style="display:flex;"><span>        activity = {
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;@context&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;https://www.w3.org/ns/activitystreams&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;type&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;Create&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;id&#34;</span>: post_id,
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;actor&#34;</span>: actor_id,
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;object&#34;</span>: {
+</span></span><span style="display:flex;"><span>                <span style="color:#d20;background-color:#fff0f0">&#34;id&#34;</span>: post_id,
+</span></span><span style="display:flex;"><span>                <span style="color:#d20;background-color:#fff0f0">&#34;type&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;Note&#34;</span>, 
+</span></span><span style="display:flex;"><span>                <span style="color:#d20;background-color:#fff0f0">&#34;published&#34;</span>: date,
+</span></span><span style="display:flex;"><span>                <span style="color:#d20;background-color:#fff0f0">&#34;content&#34;</span>: content,
+</span></span><span style="display:flex;"><span>                <span style="color:#d20;background-color:#fff0f0">&#34;attributedTo&#34;</span>: actor_id,
+</span></span><span style="display:flex;"><span>                <span style="color:#d20;background-color:#fff0f0">&#34;to&#34;</span>: [ follower_url],
+</span></span><span style="display:flex;"><span>                <span style="color:#d20;background-color:#fff0f0">&#34;cc&#34;</span>: [ follower_url]
+</span></span><span style="display:flex;"><span>            },
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;to&#34;</span>: [ follower_url],
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;cc&#34;</span>: [ follower_url]
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">if</span> public:
+</span></span><span style="display:flex;"><span>            public_flag = <span style="color:#d20;background-color:#fff0f0">&#34;https://www.w3.org/ns/activitystreams#Public&#34;</span>
+</span></span><span style="display:flex;"><span>            activity[<span style="color:#d20;background-color:#fff0f0">&#34;object&#34;</span>][<span style="color:#d20;background-color:#fff0f0">&#39;to&#39;</span>].append(public_flag)
+</span></span><span style="display:flex;"><span>            activity[<span style="color:#d20;background-color:#fff0f0">&#39;to&#39;</span>].append(public_flag)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        base.activity = activity
+</span></span><span style="display:flex;"><span>        self.__extract_followers(follower_url, base) 
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> base
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">generate_delete_activity</span>(self, actor_id, post_id):
+</span></span><span style="display:flex;"><span>        base = self.__get_base_activity()
+</span></span><span style="display:flex;"><span>        follower_url = self.__get_follower_url(actor_id)
+</span></span><span style="display:flex;"><span>        activity = {
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;@context&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;https://www.w3.org/ns/activitystreams&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;type&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;Delete&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;actor&#34;</span>: actor_id,
+</span></span><span style="display:flex;"><span>            <span style="color:#d20;background-color:#fff0f0">&#34;object&#34;</span>: post_id
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        base.activity = activity
+</span></span><span style="display:flex;"><span>        self.__extract_followers(follower_url, base) 
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> base
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#888"># Support functions</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">__extract_followers</span>(self, follower_url, activity_dto):
+</span></span><span style="display:flex;"><span>        follower_ids = self.__get_followers_id(follower_url)
+</span></span><span style="display:flex;"><span>        self.__clean_follower_ids(follower_ids)
+</span></span><span style="display:flex;"><span>        followers = []
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">for</span> follower_id <span style="color:#080">in</span> follower_ids:
+</span></span><span style="display:flex;"><span>            domain= follower_id.split(<span style="color:#d20;background-color:#fff0f0">&#34;/&#34;</span>)[<span style="color:#00d;font-weight:bold">2</span>]
+</span></span><span style="display:flex;"><span>            <span style="color:#888"># Getting inbox endpoint</span>
+</span></span><span style="display:flex;"><span>            inbox_endpoint = follower_id.split(<span style="color:#d20;background-color:#fff0f0">&#34;/&#34;</span>)[<span style="color:#00d;font-weight:bold">3</span>:]
+</span></span><span style="display:flex;"><span>            inbox_endpoint = <span style="color:#d20;background-color:#fff0f0">&#34;/&#34;</span> + <span style="color:#d20;background-color:#fff0f0">&#34;/&#34;</span>.join(inbox_endpoint)
+</span></span><span style="display:flex;"><span>            followers.append([domain, follower_id, inbox_endpoint])
+</span></span><span style="display:flex;"><span>        activity_dto.followers = followers
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">__get_follower_url</span>(self, actor_id): 
+</span></span><span style="display:flex;"><span>        response = requests.get(actor_id, headers={ <span style="color:#d20;background-color:#fff0f0">&#34;accept&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;application/activity+json&#34;</span>})
+</span></span><span style="display:flex;"><span>        data = json.loads(response.text)
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> data[<span style="color:#d20;background-color:#fff0f0">&#39;followers&#39;</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">__clean_follower_ids</span>(self, follower_ids):
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">for</span> i, follower_id <span style="color:#080">in</span> <span style="color:#038">enumerate</span>(follower_ids):
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">if</span> <span style="color:#d20;background-color:#fff0f0">&#34;inbox&#34;</span> <span style="color:#080">not</span> <span style="color:#080">in</span> follower_id:
+</span></span><span style="display:flex;"><span>                <span style="color:#080;font-weight:bold">if</span> <span style="color:#d20;background-color:#fff0f0">&#34;/&#34;</span> != follower_id[-<span style="color:#00d;font-weight:bold">1</span>]:
+</span></span><span style="display:flex;"><span>                    follower_id += <span style="color:#d20;background-color:#fff0f0">&#34;/&#34;</span>
+</span></span><span style="display:flex;"><span>                follower_id += <span style="color:#d20;background-color:#fff0f0">&#34;inbox&#34;</span>
+</span></span><span style="display:flex;"><span>                follower_ids[i] = follower_id
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">__get_followers_id</span>(self, follower_url):
+</span></span><span style="display:flex;"><span>        response = requests.get(follower_url, headers={ <span style="color:#d20;background-color:#fff0f0">&#34;accept&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;application/activity+json&#34;</span>})     
+</span></span><span style="display:flex;"><span>        data = json.loads(response.text)
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">if</span> <span style="color:#d20;background-color:#fff0f0">&#34;orderedItems&#34;</span> <span style="color:#080">in</span> data:
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">return</span> self.__get_follower_from_ordered_items(data)
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> self.__get_follower_from_ext_urls(data)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#888"># Simple case</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">__get_follower_from_ordered_items</span>(self, data): 
+</span></span><span style="display:flex;"><span>        items = data[<span style="color:#d20;background-color:#fff0f0">&#39;orderedItems&#39;</span>]
+</span></span><span style="display:flex;"><span>        follower_ids = []
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">for</span> item <span style="color:#080">in</span> items: 
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">if</span> <span style="color:#038">type</span>(item) == <span style="color:#038">str</span>:
+</span></span><span style="display:flex;"><span>                follower_ids.append(item)
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">elif</span> <span style="color:#038">type</span>(item) == <span style="color:#038">dict</span>: 
+</span></span><span style="display:flex;"><span>                follower_ids.append(item[<span style="color:#d20;background-color:#fff0f0">&#39;id&#39;</span>])
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> items
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">__get_follower_from_ext_urls</span>(self, data):
+</span></span><span style="display:flex;"><span>        excluded_keys = [ <span style="color:#d20;background-color:#fff0f0">&#34;@context&#34;</span>, <span style="color:#d20;background-color:#fff0f0">&#34;id&#34;</span>, <span style="color:#d20;background-color:#fff0f0">&#34;type&#34;</span>, <span style="color:#d20;background-color:#fff0f0">&#34;totalItems&#34;</span>] 
+</span></span><span style="display:flex;"><span>        urls = []
+</span></span><span style="display:flex;"><span>        <span style="color:#888"># Getting relevant urls</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">for</span> key <span style="color:#080">in</span> data:
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">if</span> key <span style="color:#080">not</span> <span style="color:#080">in</span> excluded_keys:
+</span></span><span style="display:flex;"><span>                urls.append(data[key])
+</span></span><span style="display:flex;"><span>     
+</span></span><span style="display:flex;"><span>        total = <span style="color:#080;font-weight:bold">None</span>
+</span></span><span style="display:flex;"><span>        follower_ids = [] 
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">while</span> <span style="color:#080;font-weight:bold">True</span>:
+</span></span><span style="display:flex;"><span>            url = urls.pop(<span style="color:#00d;font-weight:bold">0</span>)
+</span></span><span style="display:flex;"><span>            response = requests.get(url, headers={ <span style="color:#d20;background-color:#fff0f0">&#34;accept&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;application/activity+json&#34;</span>})
+</span></span><span style="display:flex;"><span>            json_data = json.loads(response.text)
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            <span style="color:#888"># Registers total Items</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">if</span> total == <span style="color:#080;font-weight:bold">None</span>: 
+</span></span><span style="display:flex;"><span>                total = json_data[<span style="color:#d20;background-color:#fff0f0">&#39;totalItems&#39;</span>]
+</span></span><span style="display:flex;"><span>                
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">if</span> <span style="color:#d20;background-color:#fff0f0">&#34;orderedItems&#34;</span> <span style="color:#080">not</span> <span style="color:#080">in</span> json_data.keys(): 
+</span></span><span style="display:flex;"><span>                <span style="color:#080;font-weight:bold">break</span> 
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">for</span> item <span style="color:#080">in</span> json_data[<span style="color:#d20;background-color:#fff0f0">&#39;orderedItems&#39;</span>]:
+</span></span><span style="display:flex;"><span>                <span style="color:#080;font-weight:bold">if</span> <span style="color:#038">type</span>(item) == <span style="color:#038">str</span>:
+</span></span><span style="display:flex;"><span>                    follower_ids.append(item)
+</span></span><span style="display:flex;"><span>                <span style="color:#080;font-weight:bold">elif</span> <span style="color:#038">type</span>(item) == <span style="color:#038">dict</span>: 
+</span></span><span style="display:flex;"><span>                    follower_ids.append(item[<span style="color:#d20;background-color:#fff0f0">&#39;id&#39;</span>])
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">if</span> <span style="color:#038">len</span>(follower_ids) &gt;= total: 
+</span></span><span style="display:flex;"><span>                <span style="color:#080;font-weight:bold">break</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            <span style="color:#888"># Registered the next urls</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">if</span> <span style="color:#d20;background-color:#fff0f0">&#34;next&#34;</span> <span style="color:#080">in</span> json_data.keys():
+</span></span><span style="display:flex;"><span>                urls.append(json_data[<span style="color:#d20;background-color:#fff0f0">&#34;next&#34;</span>])
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">elif</span> <span style="color:#d20;background-color:#fff0f0">&#34;last&#34;</span> <span style="color:#080">in</span> json_data.keys():
+</span></span><span style="display:flex;"><span>                urls.append(json_data[<span style="color:#d20;background-color:#fff0f0">&#34;last&#34;</span>])
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">else</span>: 
+</span></span><span style="display:flex;"><span>                <span style="color:#080;font-weight:bold">break</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> follower_ids
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#888"># Activity Handler</span>
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">class</span> <span style="color:#b06;font-weight:bold">ActivityHandler</span>: 
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> __init__(self, actor_id, private_key_path):
+</span></span><span style="display:flex;"><span>        self.actor_id = actor_id
+</span></span><span style="display:flex;"><span>        self.generator = ActivityGenerator.get_instance()
+</span></span><span style="display:flex;"><span>        self.handler = ActivityPubRequestHandler(actor_id, private_key_path)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">send_follow_activity</span>(self, webfinger):
+</span></span><span style="display:flex;"><span>        activity_dto = self.generator.generate_follow_activity(self.actor_id, webfinger)
+</span></span><span style="display:flex;"><span>        response = self.handler.send_request(activity_dto)
+</span></span><span style="display:flex;"><span>        self.__interpret_response(activity=<span style="color:#d20;background-color:#fff0f0">&#39;Follow&#39;</span>, response=response)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">send_accept_activity</span>(self, webfinger):
+</span></span><span style="display:flex;"><span>        activity_dto = self.generator.generate_accept_activity(self.actor_id, webfinger)
+</span></span><span style="display:flex;"><span>        <span style="color:#038">print</span>(activity_dto.activity)
+</span></span><span style="display:flex;"><span>        response = self.handler.send_request(activity_dto)
+</span></span><span style="display:flex;"><span>        self.__interpret_response(activity=<span style="color:#d20;background-color:#fff0f0">&#39;Accept&#39;</span>, response=response)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">send_publish_activity</span>(self, post_id, content, public=<span style="color:#080;font-weight:bold">True</span>):
+</span></span><span style="display:flex;"><span>        activity_dto = self.generator.generate_publish_activity(self.actor_id, post_id, content, public)
+</span></span><span style="display:flex;"><span>        responses = self.__share_to_follower(activity_dto)
+</span></span><span style="display:flex;"><span>        self.__interpret_response(activity=<span style="color:#d20;background-color:#fff0f0">&#39;Publish&#39;</span>, response=responses)
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">send_delete_activity</span>(self, post_id):
+</span></span><span style="display:flex;"><span>        activity_dto = self.generator.generate_delete_activity(self.actor_id, post_id)
+</span></span><span style="display:flex;"><span>        responses = self.__share_to_follower(activity_dto)
+</span></span><span style="display:flex;"><span>        self.__interpret_response(activity=<span style="color:#d20;background-color:#fff0f0">&#39;Delete&#39;</span>, response=responses)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">__share_to_follower</span>(self, activity_dto):
+</span></span><span style="display:flex;"><span>        responses = []
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">for</span> follower <span style="color:#080">in</span> activity_dto.followers:
+</span></span><span style="display:flex;"><span>            domain, inbox_url, inbox_endpoint = follower
+</span></span><span style="display:flex;"><span>            activity_dto.domain = domain
+</span></span><span style="display:flex;"><span>            activity_dto.inbox_url = inbox_url
+</span></span><span style="display:flex;"><span>            activity_dto.inbox_endpoint = inbox_endpoint
+</span></span><span style="display:flex;"><span>            responses.append(self.handler.send_request(activity_dto))
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">return</span> responses
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#080;font-weight:bold">def</span> <span style="color:#06b;font-weight:bold">__interpret_response</span>(self, activity, response):
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">if</span> activity <span style="color:#080">in</span> [<span style="color:#d20;background-color:#fff0f0">&#34;Follow&#34;</span>, <span style="color:#d20;background-color:#fff0f0">&#34;Accept&#34;</span>]:
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">if</span> response.ok:
+</span></span><span style="display:flex;"><span>                <span style="color:#038">print</span>(<span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#39;</span><span style="color:#04d;background-color:#fff0f0">\n</span><span style="color:#33b;background-color:#fff0f0">{</span>activity<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0"> activity successfully operated!</span><span style="color:#04d;background-color:#fff0f0">\n</span><span style="color:#d20;background-color:#fff0f0">&#39;</span>)
+</span></span><span style="display:flex;"><span>                <span style="color:#038">print</span>(response.text)
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">else</span>:
+</span></span><span style="display:flex;"><span>                <span style="color:#038">print</span>(<span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#39;</span><span style="color:#04d;background-color:#fff0f0">\n</span><span style="color:#d20;background-color:#fff0f0">Unsuccessful </span><span style="color:#33b;background-color:#fff0f0">{</span>activity<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0"> activity&#39;</span>)
+</span></span><span style="display:flex;"><span>                <span style="color:#038">print</span>(<span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#39;Status code: </span><span style="color:#33b;background-color:#fff0f0">{</span>response.status_code<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">&#39;</span>)
+</span></span><span style="display:flex;"><span>                <span style="color:#038">print</span>(<span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#39;Reason: </span><span style="color:#33b;background-color:#fff0f0">{</span>response.reason<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">&#39;</span>)
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">return</span>
+</span></span><span style="display:flex;"><span>        
+</span></span><span style="display:flex;"><span>        success = <span style="color:#00d;font-weight:bold">0</span>
+</span></span><span style="display:flex;"><span>        failure = <span style="color:#00d;font-weight:bold">0</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#080;font-weight:bold">for</span> item <span style="color:#080">in</span> response:
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">if</span> item.ok:
+</span></span><span style="display:flex;"><span>                success += <span style="color:#00d;font-weight:bold">1</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#038">print</span>(<span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#39;</span><span style="color:#04d;background-color:#fff0f0">\n</span><span style="color:#33b;background-color:#fff0f0">{</span>activity<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0"> activity successfully operated!</span><span style="color:#04d;background-color:#fff0f0">\n</span><span style="color:#d20;background-color:#fff0f0">&#39;</span>)
+</span></span><span style="display:flex;"><span>                <span style="color:#038">print</span>(item.text)
+</span></span><span style="display:flex;"><span>            <span style="color:#080;font-weight:bold">else</span>:
+</span></span><span style="display:flex;"><span>                failure += <span style="color:#00d;font-weight:bold">1</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#038">print</span>(<span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#39;</span><span style="color:#04d;background-color:#fff0f0">\n</span><span style="color:#d20;background-color:#fff0f0">Unsuccessful </span><span style="color:#33b;background-color:#fff0f0">{</span>activity<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0"> activity&#39;</span>)
+</span></span><span style="display:flex;"><span>                <span style="color:#038">print</span>(<span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#39;Status code: </span><span style="color:#33b;background-color:#fff0f0">{</span>item.status_code<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">&#39;</span>)
+</span></span><span style="display:flex;"><span>                <span style="color:#038">print</span>(<span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#39;Reason: </span><span style="color:#33b;background-color:#fff0f0">{</span>item.reason<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">&#39;</span>)
+</span></span><span style="display:flex;"><span>                <span style="color:#038">print</span>(item.text)
+</span></span><span style="display:flex;"><span>            
+</span></span><span style="display:flex;"><span>        total = success + failure
+</span></span><span style="display:flex;"><span>        <span style="color:#038">print</span>(<span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#34;</span><span style="color:#04d;background-color:#fff0f0">\n</span><span style="color:#d20;background-color:#fff0f0">Overall&#34;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#038">print</span>(<span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#34;Success: </span><span style="color:#33b;background-color:#fff0f0">{</span>success<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">&#34;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#038">print</span>(<span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#34;Failure: </span><span style="color:#33b;background-color:#fff0f0">{</span>failure<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">&#34;</span>)
+</span></span><span style="display:flex;"><span>        <span style="color:#038">print</span>(<span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#34;Total: </span><span style="color:#33b;background-color:#fff0f0">{</span>total<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">&#34;</span>)
+</span></span></code></pre></div><hr>
+<p><strong>References</strong></p>
+<ul>
+<li><a href="https://www.w3.org/TR/activitypub/#client-to-server-interactions">ActivityPub Client-Server Interactions</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Data_transfer_object">ActivityPub Follow Activity</a></li>
+<li><a href="https://www.w3.org/TR/activitypub/#create-activity-outbox">ActivityPub Create Activity</a></li>
+<li><a href="https://www.w3.org/TR/activitypub/#delete-activity-outbox">ActivityPub Delete Activity</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Data_transfer_object">Data Transfer Object</a></li>
+<li><a href="https://refactoring.guru/design-patterns/facade">Facade</a></li>
+<li><a href="https://refactoring.guru/design-patterns/singleton">Singleton</a></li>
+<li><a href="https://refactoring.guru/design-patterns/chain-of-responsibility">Chain of Responsibility</a></li>
+</ul>
+
+	
+	<script> 
+		const backToPage = () => {
+			window.location.href = "/page"
+		}
+	</script>
+</div>
+ 
+        
+    </body>
+</html>

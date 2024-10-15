@@ -1,0 +1,89 @@
+{
+    "@context": "https://www.w3.org/ns/activitystreams",
+    "id": "https://staticap.netlify.app/noah/user-info/outbox/first.json",
+    "partOf": "https://staticap.netlify.app/noah/user-info/outbox.json",
+    "type": "OrderedCollectionPage",
+    "orderedItems": [
+        {
+            "@context": "https://www.w3.org/ns/activitystreams",
+            "type": "Create",
+            "id": "https://staticap.netlify.app/page/noah/statuses/spring",
+            "actor": "https://staticap.netlify.app/noah/user-info/actor.json",
+            "object": {
+                "id": "https://staticap.netlify.app/noah/content/statuses/spring",
+                "type": "Note",
+                "published": "Fri, 27 Sep 2024 06:56:37 GMT",
+                "content": "<p>winter? is coming woah woah</p>",
+                "attributedTo": "https://staticap.netlify.app/noah/user-info/actor.json",
+                "to": [
+                    "https://staticap.netlify.app/noah/user-info/followers.json",
+                    "https://www.w3.org/ns/activitystreams#Public"
+                ],
+                "cc": [
+                    "https://staticap.netlify.app/noah/user-info/followers.json"
+                ]
+            },
+            "to": [
+                "https://staticap.netlify.app/noah/user-info/followers.json",
+                "https://www.w3.org/ns/activitystreams#Public"
+            ],
+            "cc": [
+                "https://staticap.netlify.app/noah/user-info/followers.json"
+            ]
+        },
+        {
+            "@context": "https://www.w3.org/ns/activitystreams",
+            "type": "Create",
+            "id": "https://staticap.netlify.app/page/noah/page/Summer_is_coming",
+            "actor": "https://staticap.netlify.app/noah/user-info/actor.json",
+            "object": {
+                "id": "https://staticap.netlify.app/noah/content/page/Summer_is_coming",
+                "type": "Note",
+                "published": "2024-10-04T01:46:20Z",
+                "content": "<p>Cause a little bit of summer is what the whole year is all about!</p>",
+                "attributedTo": "https://staticap.netlify.app/noah/user-info/actor.json",
+                "to": [
+                    "https://staticap.netlify.app/noah/user-info/followers.json",
+                    "https://www.w3.org/ns/activitystreams#Public"
+                ],
+                "cc": [
+                    "https://staticap.netlify.app/noah/user-info/followers.json"
+                ]
+            },
+            "to": [
+                "https://staticap.netlify.app/noah/user-info/followers.json",
+                "https://www.w3.org/ns/activitystreams#Public"
+            ],
+            "cc": [
+                "https://staticap.netlify.app/noah/user-info/followers.json"
+            ]
+        },
+        {
+            "@context": "https://www.w3.org/ns/activitystreams",
+            "type": "Create",
+            "id": "https://staticap.netlify.app/page/noah/statuses/Thesis_writing",
+            "actor": "https://staticap.netlify.app/noah/user-info/actor.json",
+            "object": {
+                "id": "https://staticap.netlify.app/noah/content/statuses/Thesis_writing",
+                "type": "Note",
+                "published": "2024-10-04T07:03:10Z",
+                "content": "Thesis writing is cool",
+                "attributedTo": "https://staticap.netlify.app/noah/user-info/actor.json",
+                "to": [
+                    "https://staticap.netlify.app/noah/user-info/followers.json",
+                    "https://www.w3.org/ns/activitystreams#Public"
+                ],
+                "cc": [
+                    "https://staticap.netlify.app/noah/user-info/followers.json"
+                ]
+            },
+            "to": [
+                "https://staticap.netlify.app/noah/user-info/followers.json",
+                "https://www.w3.org/ns/activitystreams#Public"
+            ],
+            "cc": [
+                "https://staticap.netlify.app/noah/user-info/followers.json"
+            ]
+        }
+    ]
+}

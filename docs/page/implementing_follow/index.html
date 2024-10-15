@@ -1,0 +1,129 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Implementing Follow</title>
+           
+        <link rel="stylesheet" href="/scss/style.css" />
+          
+        <link rel="stylesheet" href="/scss/header.css" />
+          
+        <link rel="stylesheet" href="/scss/footer.css" />
+          
+        <link rel="stylesheet" href="/scss/list.css" />
+          
+        <link rel="stylesheet" href="/scss/shortcodes.css" />
+        
+    </head>
+    <body>
+        <header>
+    <nav class="navbar">
+        <h1>Implementing Follow</h1>
+    </nav>
+</header>
+ 
+        
+<div class="page-body-container">
+	<h1>Implementing Follow</h1>
+	<p><em>Published on: 2024-07-19 13:49:43 &#43;1000 AEST</em></p>
+	
+		<section>
+			<strong>Pre-requisite: </strong>
+			
+			
+			
+			
+				
+				<a class="pre-link" href="/extra/signing_algorithm" style="text-transform: capitalize;">Signing Algorithm</a> 
+				
+					,
+				
+				
+			
+				
+				<a class="pre-link" href="/page/webfinger_for_discovery" style="text-transform: capitalize;">Webfinger</a> 
+				
+				
+			
+		</section>
+	
+	<hr>
+	<p>It&rsquo;s a requirements for you to setup your webfinger and actor object prior to implementing this features. You would also need to implement the following <a href="https://sdlay.netlify.app/extra/signing_algorithm">Signing Algorithm</a> (for simplicity, we&rsquo;ll implement it in Python). After implemented both the webfinger and key signing algorithm, you can use the below example to send a follow request to someone on ActivityPub instances.</p>
+<p>Example - a simple python program used to followed</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#888"># Assuming the above algorithm is stored under KeySigningHandler.py</span>
+</span></span><span style="display:flex;"><span><span style="color:#888"># under the same directory</span>
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">import</span> <span style="color:#b06;font-weight:bold">requests</span>
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">from</span> <span style="color:#b06;font-weight:bold">KeySigningHandler</span> <span style="color:#080;font-weight:bold">import</span> *
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#888"># This is the url that leads to your actor object</span>
+</span></span><span style="display:flex;"><span>actorId = <span style="color:#d20;background-color:#fff0f0">&#34;https://noah.netlify.app/noah/actor.json&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#888"># This is the file path leading to the private key generated </span>
+</span></span><span style="display:flex;"><span><span style="color:#888"># using the algorithm found in &#34;Webfinger for Discovery Post&#34;</span>
+</span></span><span style="display:flex;"><span>privateKeyPath = <span style="color:#d20;background-color:#fff0f0">&#34;...&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#888"># This is the webfinger of the user that you want to follow</span>
+</span></span><span style="display:flex;"><span>webfinger = <span style="color:#d20;background-color:#fff0f0">&#34;@alice@mastodon.social&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>handler = KeySigningHandler(actorId, privateKeyPath)
+</span></span><span style="display:flex;"><span>activity = handler.generateFollowActivity(webfinger)
+</span></span><span style="display:flex;"><span>inboxUrl, body, headers = handler.generateSignedHeaders(activity, webfinger)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>response = requests.post(inboxUrl, headers=headers, data=data)
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">if</span> response.ok:
+</span></span><span style="display:flex;"><span>	<span style="color:#038">print</span>(<span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#34;Successfully followed: </span><span style="color:#33b;background-color:#fff0f0">{</span>webfinger<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">&#34;</span>)
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">else</span>:
+</span></span><span style="display:flex;"><span>	<span style="color:#038">print</span>(<span style="color:#d20;background-color:#fff0f0">f</span><span style="color:#d20;background-color:#fff0f0">&#34;</span><span style="color:#33b;background-color:#fff0f0">{</span>response.status_code<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">: Unable to follow </span><span style="color:#33b;background-color:#fff0f0">{</span>webfinger<span style="color:#33b;background-color:#fff0f0">}</span><span style="color:#d20;background-color:#fff0f0">&#34;</span>)
+</span></span><span style="display:flex;"><span>	<span style="color:#038">print</span>(response.reason)
+</span></span></code></pre></div><p><strong>Quick Summary of the Above Code:</strong></p>
+<p>Things you need:</p>
+<ol>
+<li>URL that leads to your actor Object</li>
+<li>The person you want to follow Webfinger</li>
+</ol>
+<p>Process:</p>
+<ol>
+<li>Initialise the <code class="pretty-code">KeySigningHandler</code>
+ object, using the actor object url and path to your private key</li>
+<li>Generate the <a href="https://www.w3.org/TR/activitypub/#follow-activity-outbox">@Follow</a> activity using the target user webfinger</li>
+<li>Calls the <code class="pretty-code">generateSignedHeader</code>
+ method using the previously generated activity and target user webfinger. This would return the <code>(inboxUrl, body, headers)</code>. Each of the components can be explained as followed:
+3.1. <code>inboxUrl</code> - the url that we needs to send the returned <code>body</code> and <code>header</code> to
+3.2. <code>body</code> - the json version of the activity that was previously generated in step 2
+3.3. <code>headers</code> - formatted headers with necessarily information to meet the ActivityPub protocol requirements</li>
+<li>Using the returned values from step 3, we make a POST HTTP request to <code>inboxUrl</code> using the <code>body</code> and <code>headers</code></li>
+</ol>
+<p>The structure of a <a href="https://www.w3.org/TR/activitypub/#follow-activity-outbox">@Follow</a> activity is as followed:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>	<span style="color:#d20;background-color:#fff0f0">&#34;@context&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;https://www.w3.org/ns/activitystreams&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="color:#d20;background-color:#fff0f0">&#34;type&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;Follow&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="color:#d20;background-color:#fff0f0">&#34;actor&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;</span><span style="color:#33b;background-color:#fff0f0">{YOUR_ACTOR_OBJECT_URL}</span><span style="color:#d20;background-color:#fff0f0">&#34;</span>, 
+</span></span><span style="display:flex;"><span>	<span style="color:#d20;background-color:#fff0f0">&#34;object&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;</span><span style="color:#33b;background-color:#fff0f0">{TARGET_ACTOR_OBJECT_URL}</span><span style="color:#d20;background-color:#fff0f0">&#34;</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><hr>
+<p><strong>References</strong></p>
+<ul>
+<li><a href="https://paul.kinlan.me/adding-activity-pub-to-your-static-site/">Adding ActivityPub to Your Static Site - Paul Kinlan</a></li>
+<li><a href="https://www.w3.org/TR/activitypub/#follow-activity-outbox">Follow Activity - w3 org</a></li>
+</ul>
+
+	
+		<hr>
+		<strong>See Next</strong>
+		<ul>
+		
+			
+			<li><a class="pre-link" href="/page/implementing_post" style="text-transform: capitalize;">Implementing Post</a></li>
+		
+		</ul>
+	
+	<script> 
+		const backToPage = () => {
+			window.location.href = "/page"
+		}
+	</script>
+</div>
+ 
+        
+    </body>
+</html>

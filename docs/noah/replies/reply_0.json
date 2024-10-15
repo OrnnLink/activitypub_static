@@ -1,0 +1,13 @@
+{
+    "@context": "https://www.w3.org/ns/activitystreams",
+    "type": "Create",
+    "id": "https://staticap.netlify.app/noah/replies/reply_0",
+    "actor": "https://staticap.netlify.app/noah/user-info/actor.json",
+    "object": {
+        "id": "https://staticap.netlify.app/noah/replies/reply_0",
+        "type": "Note",
+        "published": "2024-10-03T09:54:14Z",
+        "content": "I know right, hurray!!! Winter",
+        "inReplyTo": "https://mastodon.social/users/pbandj9819/statuses/113241049198515643"
+    }
+}

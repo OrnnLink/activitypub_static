@@ -1,0 +1,161 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Webfinger For Discovery</title>
+           
+        <link rel="stylesheet" href="/scss/style.css" />
+          
+        <link rel="stylesheet" href="/scss/header.css" />
+          
+        <link rel="stylesheet" href="/scss/footer.css" />
+          
+        <link rel="stylesheet" href="/scss/list.css" />
+          
+        <link rel="stylesheet" href="/scss/shortcodes.css" />
+        
+    </head>
+    <body>
+        <header>
+    <nav class="navbar">
+        <h1>Webfinger For Discovery</h1>
+    </nav>
+</header>
+ 
+        
+<div class="page-body-container">
+	<h1>Webfinger For Discovery</h1>
+	<p><em>Published on: 2024-07-18 14:11:45 &#43;1000 AEST</em></p>
+	
+	<hr>
+	<h2 id="webfinger-fundamental">Webfinger Fundamental</h2>
+<p>Webfinger is often used to idenify a user profile under a specific domain. By definition, a user webfinger can be separated into two pieces to help platforms, such as Pleroma, Mastodon, Ktistec, etc., to discover and retrieved relevant information about your profile. Take for instance, <code class="pretty-code">@noah@mastodon.social</code>
+, the first part of the webfinger <code>@noah</code> is used to identifed the user of the domain <code>@mastodon.social</code>.</p>
+<p>When a user on an Activity Pub Platform look up another person (i.e. Bob lookup noah), many of the ActivityPub platform would attempt to look for the user <strong>noah</strong> locally on the instance first, before making a request to <code>@domain</code> provided by the webfinger.</p>
+<p>The instance typically makes a request to <code class="pretty-code">https://domain/.well-known/webfinger</code>
+, with the following parameter <code class="pretty-code">?resource=acct:user@domain</code>
+. For our example, it would be <code>https://mastodon.social/.well-known/webfinger?resource=acct:noah@mastodon.social</code>.</p>
+<h2 id="setting-up-webfinger">Setting up Webfinger</h2>
+<p>Now that we understand how ActivityPub uses Webfinger to look up a user on your domain. We can start focusing on building the minimal setup such that a user on our site can be discovered by other ActivityPub instances.</p>
+<p>To do this, we will utilise Hugo as our static-site generator (SSR) framework, and Netlify as our deploying services. It&rsquo;s important to note, as of now, it is now possible to make your webfinger discoverable if you are choosing Github Page as your deploying services. The problem is most ActivityPub instances requires the field <code class="pretty-code">Content-Type: application/activity+json</code>
+ inside the headers, and Github does not allow developer to make any modification to the headers. We will bypass this system, by using Netlify as our deployment method, it is also possible to setup custom headers, if you are using custom domain too.</p>
+<p>After setting up the basic layout of your hugo project, you need to create a new plain-text file without any extension, under <code class="pretty-code">/static/.well-known/webfinger</code>
+. Inside the <code>webfinger</code> file, we&rsquo;ll setup the following JSON structure:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>	<span style="color:#b06;font-weight:bold">&#34;subject&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;acct:USERNAME@YOUR_DOMAIN&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="color:#b06;font-weight:bold">&#34;aliases&#34;</span>: [],
+</span></span><span style="display:flex;"><span>	<span style="color:#b06;font-weight:bold">&#34;links&#34;</span>: {
+</span></span><span style="display:flex;"><span>		<span style="color:#b06;font-weight:bold">&#34;rel&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;self&#34;</span>,
+</span></span><span style="display:flex;"><span>		<span style="color:#b06;font-weight:bold">&#34;type&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;application/activity+json&#34;</span>,
+</span></span><span style="display:flex;"><span>		<span style="color:#b06;font-weight:bold">&#34;href&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;https://YOUR_DOMAIN/USERNAME/actor.json&#34;</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Let <code class="pretty-code">USERNAME=noah</code>
+ and <code class="pretty-code">YOUR_DOMAIN=noah.netlify.app</code>
+, our webfinger structure becomes:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>	<span style="color:#b06;font-weight:bold">&#34;subject&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;acct:noah@noah.netlify.app&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="color:#b06;font-weight:bold">&#34;aliases&#34;</span>: [],
+</span></span><span style="display:flex;"><span>	<span style="color:#b06;font-weight:bold">&#34;links&#34;</span>: {
+</span></span><span style="display:flex;"><span>		<span style="color:#b06;font-weight:bold">&#34;rel&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;self&#34;</span>,
+</span></span><span style="display:flex;"><span>		<span style="color:#b06;font-weight:bold">&#34;type&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;application/activity+json&#34;</span>,
+</span></span><span style="display:flex;"><span>		<span style="color:#b06;font-weight:bold">&#34;href&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;https://noah.netlify.app/noah/actor.json&#34;</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Under the aliases section, you can include any relevant link that directs the user to your <code class="pretty-code">text/html</code>
+ document, representing your actor object. For instance, the user can find someone mastodon aliases under <code class="pretty-code">https://mastodon.social/@USERNAME</code>
+ or <code class="pretty-code">https://mastodon.social/users/USERNAME</code>
+</p>
+<h2 id="setting-up-your-actor-object">Setting Up Your Actor Object</h2>
+<p>After setting up your webfinger, we&rsquo;ll need to create <code class="pretty-code">/static/noah</code>
+ with noah is the username we used in our previous example. Inside the noah folders, we are gonna need to create the following json files:</p>
+<ol>
+<li>actor.json</li>
+<li>followers.json - can be empty</li>
+<li>following.json - can be empty</li>
+<li>inbox.json - can be empty</li>
+<li>outbox.json - can be empty</li>
+</ol>
+<p>The structure of actor.json is as followed:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>	<span style="color:#b06;font-weight:bold">&#34;@context&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;https://www.w3.org/ns/activitystreams&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="color:#b06;font-weight:bold">&#34;type&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;Person&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="color:#b06;font-weight:bold">&#34;preferredUsername&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;noah&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="color:#b06;font-weight:bold">&#34;id&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;https://noah.netlify.app/noah/actor.json&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="color:#b06;font-weight:bold">&#34;inbox&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;https://noah.netlify.app/noah/inbox.json&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="color:#b06;font-weight:bold">&#34;outbox&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;https://noah.netlify.app/noah/outbox.json&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="color:#b06;font-weight:bold">&#34;followers&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;https://noah.netlify.app/noah/followers.json&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="color:#b06;font-weight:bold">&#34;following&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;https://noah.netlify.app/noah/following.json&#34;</span>,
+</span></span><span style="display:flex;"><span>	<span style="color:#b06;font-weight:bold">&#34;publicKey&#34;</span>: {
+</span></span><span style="display:flex;"><span>		<span style="color:#b06;font-weight:bold">&#34;id&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;https://noah.netlify.app/noah/actor.json#main-key&#34;</span>, 
+</span></span><span style="display:flex;"><span>		<span style="color:#b06;font-weight:bold">&#34;owner&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;https://noah.netlify.app/noah/actor.json&#34;</span>,
+</span></span><span style="display:flex;"><span>		<span style="color:#b06;font-weight:bold">&#34;publicKeyPem&#34;</span>: <span style="color:#d20;background-color:#fff0f0">&#34;...&#34;</span>
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Your public key can be generated via the following javascript code:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span><span style="color:#888">// generate-keys.js
+</span></span></span><span style="display:flex;"><span><span style="color:#888"></span>
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">const</span> { generateKeyPairSync } = require(<span style="color:#d20;background-color:#fff0f0">&#39;crypto&#39;</span>);
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">const</span> fs = require(<span style="color:#d20;background-color:#fff0f0">&#39;fs&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#080;font-weight:bold">const</span> { publicKey, privateKey } = generateKeyPairSync(<span style="color:#d20;background-color:#fff0f0">&#39;rsa&#39;</span>, {
+</span></span><span style="display:flex;"><span>  modulusLength: <span style="color:#00d;font-weight:bold">2048</span>,
+</span></span><span style="display:flex;"><span>  publicKeyEncoding: {
+</span></span><span style="display:flex;"><span>    type: <span style="color:#d20;background-color:#fff0f0">&#39;pkcs1&#39;</span>,
+</span></span><span style="display:flex;"><span>    format: <span style="color:#d20;background-color:#fff0f0">&#39;pem&#39;</span>
+</span></span><span style="display:flex;"><span>  },
+</span></span><span style="display:flex;"><span>  privateKeyEncoding: {
+</span></span><span style="display:flex;"><span>    type: <span style="color:#d20;background-color:#fff0f0">&#39;pkcs1&#39;</span>,
+</span></span><span style="display:flex;"><span>    format: <span style="color:#d20;background-color:#fff0f0">&#39;pem&#39;</span>
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>});
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#888">// Save the keys to files
+</span></span></span><span style="display:flex;"><span><span style="color:#888"></span>fs.writeFileSync(<span style="color:#d20;background-color:#fff0f0">&#39;public_key.pem&#39;</span>, publicKey);
+</span></span><span style="display:flex;"><span>fs.writeFileSync(<span style="color:#d20;background-color:#fff0f0">&#39;private_key.pem&#39;</span>, privateKey);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#888">// Printing out the public and private keys
+</span></span></span><span style="display:flex;"><span><span style="color:#888"></span>console.log(<span style="color:#d20;background-color:#fff0f0">&#39;Public Key:&#39;</span>, publicKey);
+</span></span><span style="display:flex;"><span>console.log(<span style="color:#d20;background-color:#fff0f0">&#39;Private Key:&#39;</span>, privateKey);
+</span></span></code></pre></div><p>After generating your public key and filling it inside <code class="pretty-code">publicKeyPem</code>
+, you would then need to make sure that the <code>Content-Type</code> for <code class="pretty-code">/noah/actor.json</code>
+ end point, to be <code class="pretty-code">application/activity+json</code>
+. Using netlify, this can be done by creating a file <code>netlify.toml</code> at the root directory of your github project and adds the following lines</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-toml" data-lang="toml"><span style="display:flex;"><span>[[headers]]
+</span></span><span style="display:flex;"><span>for = <span style="color:#d20;background-color:#fff0f0">&#34;/noah/*&#34;</span>
+</span></span><span style="display:flex;"><span>[headers.values]
+</span></span><span style="display:flex;"><span>Content-Types = <span style="color:#d20;background-color:#fff0f0">&#34;application/activity+json&#34;</span>
+</span></span></code></pre></div><p>By completing all the steps above, ActivityPub platforms can now discovered a user on your static site via Webfinger.</p>
+<hr>
+<p><strong>References</strong></p>
+<ul>
+<li><a href="https://paul.kinlan.me/adding-activity-pub-to-your-static-site/">Adding ActivityPub to Your Static Site - Paul Kinlan</a></li>
+<li><a href="https://webfinger.net/">Understanding Webfinger</a></li>
+<li><a href="https://docs.joinmastodon.org/spec/webfinger/">Mastodon Webfinger</a></li>
+</ul>
+
+	
+		<hr>
+		<strong>See Next</strong>
+		<ul>
+		
+			
+			<li><a class="pre-link" href="/page/implementing_follow" style="text-transform: capitalize;">Implementing Follow</a></li>
+		
+			
+			<li><a class="pre-link" href="/page/implementing_post" style="text-transform: capitalize;">Implementing Post</a></li>
+		
+			
+			<li><a class="pre-link" href="/extra/signing_algorithm" style="text-transform: capitalize;">Signing Algorithms</a></li>
+		
+		</ul>
+	
+	<script> 
+		const backToPage = () => {
+			window.location.href = "/page"
+		}
+	</script>
+</div>
+ 
+        
+    </body>
+</html>
