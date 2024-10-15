@@ -1,8 +1,0 @@
-@import url("https://fonts.googleapis.com/css2?family=Lato");
-@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk");
-@import url("https://fonts.googleapis.com/css2?family=Roboto");
-@import url("https://fonts.googleapis.com/css2?family=Roboto+Mono");
-footer {
-  display: flex;
-  background-color: #071952;
-  min-height: 300px; }

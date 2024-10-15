@@ -1,7 +1,0 @@
-{
-    "@context": "https://www.w3.org/ns/activitystreams",
-    "id": "https://staticap.netlify.app/noah/user-info/inbox/first.json",
-    "partOf": "https://staticap.netlify.app/noah/user-info/inbox.json",
-    "type": "OrderedCollectionPage",
-    "orderedItems": []
-}

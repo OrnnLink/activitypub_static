@@ -1,9 +1,0 @@
-{
-    "@context": "https://www.w3.org/ns/activitystreams",
-    "id": "https://staticap.netlify.app/noah/user-info/following/first.json",
-    "partOf": "https://staticap.netlify.app/noah/user-info/following.json",
-    "type": "OrderedCollectionPage",
-    "orderedItems": [
-        "https://mastodon.social/users/pbandj9819"
-    ]
-}
