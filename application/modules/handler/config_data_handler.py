@@ -30,3 +30,4 @@ class ConfigDataHandler:
         self.follower_url = f"https://{self.domain}/{self.username}/user-info/followers.json"
         self.following_url = f"https://{self.domain}/{self.username}/user-info/following.json"
         self.private_key_path = data["private_key_path"]
+        self.root_dir_path  = data["root_dir_path"]
