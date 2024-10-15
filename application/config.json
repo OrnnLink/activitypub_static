@@ -1,7 +1,7 @@
 {
     "username": "noah",
     "domain": "staticap.netlify.app",
-    "private_key_path": "resources/private_key.pem",
+    "site_dir_path": "../activitypub",
     "public_key_path": "resources/public_key.pem",
     "site_dir_path": "../activitypub",
     "root_dir_path": ".."

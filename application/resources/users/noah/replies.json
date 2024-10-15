@@ -34,7 +34,12 @@
             "id": 6,
             "in_reply_to_id": "https://mastodon.social/users/pbandj9819/statuses/113241049198515643",
             "content": "What do you think about summer?"
+        },
+        {
+            "id": 7,
+            "in_reply_to_id": "https://mastodon.social/users/pbandj9819/statuses/113247884949316204",
+            "content": "no way, you are wrong"
         }
     ],
-    "reply_count": 7
+    "reply_count": 8
 }

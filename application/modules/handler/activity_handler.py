@@ -46,7 +46,9 @@ class ActivityHandler():
     
     def send_reply_activity(self, id_count, in_reply_to_id, content):
         post_id = f"https://{self.config_handler.domain}/{self.config_handler.username}/replies/reply_{id_count}.json"
-        activity_dto = ActivityDTO(post_id=post_id, content=content, in_reply_to_id=in_reply_to_id)
+        activity_dto = ActivityDTO(
+            post_id=post_id, content=content, in_reply_to_id=in_reply_to_id
+        )
         activity_dto.activity = self.generator.generate_reply_activity(
             self.config_handler.actor_id, activity_dto
         )

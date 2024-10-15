@@ -12,11 +12,11 @@ def send_post_request(url, headers, activity):
     return requests.post(url, headers=headers, data=activity)
 
 def read_from_json(filename):
-    with open(filename, "r") as fd:
-        try:
+    try:
+        with open(filename, "r") as fd:
             return json.load(fd)
-        except Exception as e:
-            return None
+    except Exception as e:
+        return None
 
 def write_to_json(data: dict, filename: str):
     with open(filename, "w") as fd:

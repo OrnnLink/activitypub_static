@@ -10,8 +10,6 @@ class ConfigDataHandler:
 
     def __init__(self, filename: str=None):
         self.filename = "config.json"
-        if filename != None:
-            self.filename = self.filename
         self.__load_config()
     
     def set_config(self, filename):
@@ -20,7 +18,8 @@ class ConfigDataHandler:
         
     def __load_config(self):
         data = read_from_json(self.filename)
-
+        if data == None:
+            return 
         self.username = data['username']
         self.domain= data['domain']
         self.site_dir_path = data["site_dir_path"]

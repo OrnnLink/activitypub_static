@@ -3,19 +3,22 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://staticap.netlify.app/noah/</loc>
-    <lastmod>2024-09-27T16:56:37+10:00</lastmod>
+    <lastmod>2024-10-04T17:03:10+10:00</lastmod>
+  </url><url>
+    <loc>https://staticap.netlify.app/</loc>
+    <lastmod>2024-10-04T17:03:10+10:00</lastmod>
+  </url><url>
+    <loc>https://staticap.netlify.app/noah/statuses/thesis_writing/</loc>
+    <lastmod>2024-10-04T17:03:10+10:00</lastmod>
+  </url><url>
+    <loc>https://staticap.netlify.app/noah/page/summer_is_coming/</loc>
+    <lastmod>2024-10-04T11:46:20+10:00</lastmod>
   </url><url>
     <loc>https://staticap.netlify.app/noah/statuses/spring/</loc>
     <lastmod>2024-09-27T16:56:37+10:00</lastmod>
   </url><url>
-    <loc>https://staticap.netlify.app/</loc>
-    <lastmod>2024-09-27T16:56:37+10:00</lastmod>
-  </url><url>
     <loc>https://staticap.netlify.app/page/</loc>
-    <lastmod>2024-09-20T16:30:18+10:00</lastmod>
-  </url><url>
-    <loc>https://staticap.netlify.app/page/spring/</loc>
-    <lastmod>2024-09-20T16:30:18+10:00</lastmod>
+    <lastmod>2024-08-09T09:50:42+10:00</lastmod>
   </url><url>
     <loc>https://staticap.netlify.app/page/running_activitypub_server_leveraging_static_web_hosting/</loc>
     <lastmod>2024-08-09T09:50:42+10:00</lastmod>

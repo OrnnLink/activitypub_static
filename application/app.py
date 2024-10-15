@@ -48,7 +48,7 @@ def get_user_input():
 	data = read_from_json(activity_files[user_input])
 	print(data)
 	verify = input("\nIs the information correct? [Y|N] ").lower()
-	if verify == "Y":
+	if verify == "y":
 		return user_input
 	else:
 		return None
@@ -75,14 +75,14 @@ def main():
 	elif user_input == 7:
 		controller.publish_content()
 
-	site_dir_path = controller.handler['activity'].site_dir_path
+	site_dir_path = controller.handler['activity'].config_handler.site_dir_path
 	if user_input != 3:
 		command = f"cd {site_dir_path} && hugo"
 		subprocess.run(command, shell=True, capture_output=True, text=True)
 
 
 if __name__ == "__main__":
-	controller = ActivityController()
+	# controller = ActivityController()
 	# controller.send_reply()
 	# controller.get_replies()
 	# controller.send_follow_activity()
@@ -91,8 +91,8 @@ if __name__ == "__main__":
 	# controller.publish_content()
 	# controller.create_user()
 	
+	main()
 	...
 
 
-	# main()
 
