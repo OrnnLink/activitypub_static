@@ -16,6 +16,10 @@ def make_test_folder():
     filenames = {
         "tests/activitypub/hugo.toml": ["baseURL = 'https://staticap.netlify.app/'\n"]
     }
+
+    with open("tests/netlify.toml", "w") as fd:
+        fd.writelines([])
+
     for filename in filenames:
         lines = filenames[filename]
         with open(filename, "w") as fd:
@@ -35,15 +39,17 @@ def tear_down_test_folders():
     for dirname in dirnames:
         shutil.rmtree(dirname)
     os.remove("tests/config.json")
+    os.remove("tests/netlify.toml")
     
 def __make_config_file():
     filename = "tests/config.json"
     data = {
-        "username": "noah",
-        "domain": "staticap.netlify.app",
+        "username": "",
+        "domain": "",
         "private_key_path": "tests/resources/private_key.pem",
         "public_key_path": "tests/resources/public_key.pem",
-        "site_dir_path": "tests/activitypub"
+        "site_dir_path": "tests/activitypub",
+        "root_dir_path": "tests"
     }
     write_to_json(data, filename) 
 

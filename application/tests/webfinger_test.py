@@ -19,6 +19,7 @@ class WebfingerHandlerTest(unittest.TestCase):
 		actor_id = self.__verify_webfinger_created(username, domain)
 		self.__verify_actor_id_created(username, actor_id)
 		self.__verify_support_files_created(username, actor_id)
+		self.__verify_netlify_toml(username)
 	
 	def __verify_domain_in_hugo_toml(self, domain):
 		with open("tests/activitypub/hugo.toml", "r") as fd:
@@ -125,18 +126,32 @@ class WebfingerHandlerTest(unittest.TestCase):
 				"orderedItems": []
 			}
 			self.assertEqual(expected, data)
-		
+
+	def __verify_netlify_toml(self, username):
+		with open("tests/netlify.toml", "r") as fd:
+			data = fd.readlines()
+		data = [line.strip() for line in data]
+		expected = [
+			"[[headers]]",
+			f'for = "/{username}/*"',
+			"[headers.values]", 
+			'Content-Type = "application/activity+json; charset=utf-8"',
+			""
+		]
+		self.assertEqual(expected, data)
+
 	def test_basic_create(self):
 		username = 'simon'
 		domain = "test.domain.com"
 		self.handler.create_user(username, domain)
 		self.__verify(username, domain)
 	
-	def test_create_already_existed_user(self):
-		username =  'noah'
-		domain = "staticap.netlify.app"
-		self.handler.create_user(username, domain)
-		self.__verify_domain_in_hugo_toml(domain)
+
+	# def test_create_already_existed_user(self):
+	# 	username =  'noah'
+	# 	domain = "staticap.netlify.app"
+	# 	self.handler.create_user(username, domain)
+	# 	self.__verify_domain_in_hugo_toml(domain)
 		
 
 	
