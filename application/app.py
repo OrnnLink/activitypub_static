@@ -76,9 +76,11 @@ def main():
 		controller.publish_content()
 
 	site_dir_path = controller.handler['activity'].config_handler.site_dir_path
+	print("Successfully ran the activity!")
 	if user_input != 3:
 		command = f"cd {site_dir_path} && hugo"
 		subprocess.run(command, shell=True, capture_output=True, text=True)
+		print("Update the Hugo project...!")
 
 
 if __name__ == "__main__":
