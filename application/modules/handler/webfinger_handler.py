@@ -77,6 +77,15 @@ class WebfingerHandler:
         template = {
             "@context": [
                 "https://www.w3.org/ns/activitystreams",
+                "https://w3id.org/security/v1",
+                {
+                  "schema": "http://schema.org#",
+                  "PropertyValue": "schema:PropertyValue",
+                  "value": "schema:value"
+                },
+                {
+                  "discoverable": "http://joinmastodon.org/ns#discoverable"
+                }
             ],
             "endpoints": {
                 "sharedInbox": f"{actor_id}/inbox.json"
@@ -85,6 +94,7 @@ class WebfingerHandler:
             "type": "Person",
             "preferredUsername": f"{username}",
             "name": f"{username}",
+            "discoverable": True, 
             "inbox": f"{actor_id}/inbox.json",
             "outbox": f"{actor_id}/outbox.json",
             "followers": f"{actor_id}/followers.json",
