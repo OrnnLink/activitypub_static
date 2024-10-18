@@ -1,6 +1,15 @@
 {
     "@context": [
-        "https://www.w3.org/ns/activitystreams"
+        "https://www.w3.org/ns/activitystreams",
+        "https://w3id.org/security/v1",
+        {
+          "schema": "http://schema.org#",
+          "PropertyValue": "schema:PropertyValue",
+          "value": "schema:value"
+        },
+        {
+          "discoverable": "http://joinmastodon.org/ns#discoverable"
+        }
     ],
     "endpoints": {
         "sharedInbox": "https://staticap.netlify.app/noah/user-info/inbox.json"
@@ -9,6 +18,7 @@
     "type": "Person",
     "preferredUsername": "noah",
     "name": "noah",
+    "discoverable": true,
     "inbox": "https://staticap.netlify.app/noah/user-info/inbox.json",
     "outbox": "https://staticap.netlify.app/noah/user-info/outbox.json",
     "followers": "https://staticap.netlify.app/noah/user-info/followers.json",
