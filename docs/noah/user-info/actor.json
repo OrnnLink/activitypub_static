@@ -29,6 +29,6 @@
         "@type": "key",
         "id": "https://staticap.netlify.app/noah/user-info/actor.json#main-key",
         "owner": "https://staticap.netlify.app/noah/user-info/actor.json",
-        "publicKeyPem": "-----BEGIN RSA PUBLIC KEY-----\nMIIBCgKCAQEAp3XLiZyeJ4T4ZeykXT/HkDC4kKcA8B0wf27HEa4pEUH7GGICkvSN\nfXvM7lxLYvysfswg4beG7qIR3ZZfhal+QY+fozxC2M6K8ujsGFa38H+rOK24t+Js\nQZ9zvJdRNbQ00sxRu0LRDrht5gdMwTbp0WvNeQFqJRGGBY5lwOh4DFXEAMhzlU7H\nJ1xINCVrDUTRhUsTrStKLe8PlQ5xfMdPJ33fL1G1t9VJALc+ckgZCXyqpGu3yc+b\nnBzq+WPBSVmtQ+GOohx6FsF1vgxafoxoFrCBaH7nyKsxPsgWj7fPpi5r27K6fk8D\nFZ31poUMO6dKfXinmP5WKCO9xJDdZK504QIDAQAB\n-----END RSA PUBLIC KEY-----\n"
+        "publicKeyPem": "-----BEGIN RSA PUBLIC KEY-----\nMIIBCgKCAQEAp3XLiZyeJ4T4ZeykXT/HkDC4kKcA8B0wf27HEa4pEUH7GGICkvSN\nfXvM7lxLYvysfswg4beG7qIR3ZZfhal+QY+fozxC2M6K8ujsGFa38H+rOK24t+Js\nQZ9zvJdRNbQ00sxRu0LRDrht5gdMwTbp0WvNeQFqJRGGBY5lwOh4DFXEAMhzlU7H\nJ1xINCVrDUTRhUsTrStKLe8PlQ5xfMdPJ33fL1G1t9VJALc+ckgZCXyqpGu3yc+b\nnBzq+WPBSVmtQ+GOohx6FsF1vgxafoxoFrCBaH7nyKsxPsgWj7fPpi5r27K6fk8D\nFZ31poUMO6dKfXinmP5WKCO9xJDdZK504QIDAQAB\n-----END RSA PUBLIC KEY-----"
     }
 }
