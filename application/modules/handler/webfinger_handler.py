@@ -72,7 +72,7 @@ class WebfingerHandler:
         actor_id = f"https://{self.config_handler.domain}/{username}/user-info"
         with open(self.config_handler.public_key_path, "r") as fd: 
             publicKey = fd.readlines()
-        publicKey = "\n".join([line.strip() for line in publicKey])
+        publicKey = "\n".join([line.strip() for line in publicKey]) + "\n"
         # publicKey = "\n".join([line.strip() for line in open(self.config_handler.public_key_path, "r")])
         template = {
             "@context": [
