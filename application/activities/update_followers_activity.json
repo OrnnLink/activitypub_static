@@ -1,4 +1,4 @@
 {
-    "webfinger": "",
+    "webfinger": "@username@domain",
     "add_follower": true
 }
