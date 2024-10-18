@@ -2,8 +2,8 @@
     "aliases": [],
     "links": [
         {
-            "href": "https://staticap.netlify.app/noah/user-info/actor.json",
             "rel": "self",
+            "href": "https://staticap.netlify.app/noah/user-info/actor.json",
             "type": "application/activity+json"
         }
     ],
