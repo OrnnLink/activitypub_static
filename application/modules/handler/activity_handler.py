@@ -3,6 +3,7 @@ from modules.handler.config_data_handler import ConfigDataHandler
 from modules.generator.activity_generator import ActivityGenerator
 from modules.dto.activity_dto import ActivityDTO
 from modules.handler.activity_request_handler import ActivityRequestHandler
+import json
 
 class ActivityHandler(): 
     def __init__(self):
@@ -37,7 +38,7 @@ class ActivityHandler():
     def send_update_activity(self, post_id, content, public=True):
         activity_dto = ActivityDTO(
             post_id=post_id, content=content, public=public, 
-            follower_url=self.config_handler.follower_url, username=self.username
+            follower_url=self.config_handler.follower_url, username=self.config_handler.username
         )
         activity_dto.activity = self.generator.generate_update_activity(
             self.config_handler.actor_id, activity_dto

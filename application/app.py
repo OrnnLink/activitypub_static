@@ -2,8 +2,7 @@ from modules.utility import read_from_json
 from modules.controller.activity_controller import ActivityController
 import subprocess
 
-
-# g = GetReplyHandler()
+# g = GetReplyHandler(
 # g.get_replies()
 activity_files = {
 	1: "following_activity.json",
