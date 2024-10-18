@@ -1,0 +1,20 @@
+{	
+	"@context": "https://www.w3.org/ns/activitystreams",
+	"type": "Update",
+	"actor": "https://staticap.netlify.app/noah/user-info/actor.json",
+	"object": {
+		"id": "https://other_domain/username/post_id",
+		"type": "Note",
+		"content": "nice post",
+		"updated": "2024-10-18T05:07:37Z",
+		"to": [
+			"https://staticap.netlify.app/noah/user-info/followers.json", 
+			"https://www.w3.org/ns/activitystreams#Public"
+		], 
+		"attributedTo": "https://staticap.netlify.app/noah/user-info/actor.json"
+	}, 
+	"to": [
+		"https://staticap.netlify.app/noah/user-info/followers.json",
+		"https://www.w3.org/ns/activitystreams#Public"
+	]
+}

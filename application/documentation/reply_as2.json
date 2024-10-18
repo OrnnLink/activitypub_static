@@ -1,0 +1,13 @@
+{
+  "@context": "https://www.w3.org/ns/activitystreams",
+  "type": "Create",
+  "id": "https://staticap.netlify.app/noah/replies/reply_10.json",
+  "actor": "https://staticap.netlify.app/noah/user-info/actor.json",
+  "object": {
+    "id": "https://staticap.netlify.app/noah/replies/reply_10.json",
+    "type": "Note",
+    "published": "2024-10-18T05:10:31Z",
+    "content": "nice post",
+    "inReplyTo": "https://other_domain/username/post/id"
+  }
+}

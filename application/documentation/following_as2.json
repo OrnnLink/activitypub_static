@@ -1,0 +1,15 @@
+{
+	"@context": "https://www.w3.org/ns/activitystreams", 
+	"type": "Follow",
+	"actor": "https://staticap.netlify.app/noah/user-info/actor.json", 
+	"object": "https://mastodon.social/users/pbandj9819"
+}
+
+
+
+
+
+
+
+
+
