@@ -145,13 +145,15 @@ class WebfingerHandlerTest(unittest.TestCase):
 		domain = "test.domain.com"
 		self.handler.create_user(username, domain)
 		self.__verify(username, domain)
+		self.handler.create_user(username, domain )
+		self.__verify(username, domain)
 	
 
-	# def test_create_already_existed_user(self):
-	# 	username =  'noah'
-	# 	domain = "staticap.netlify.app"
-	# 	self.handler.create_user(username, domain)
-	# 	self.__verify_domain_in_hugo_toml(domain)
+	def test_create_already_existed_user(self):
+		username =  'noah'
+		domain = "staticap.netlify.app"
+		self.handler.create_user(username, domain)
+		self.__verify_domain_in_hugo_toml(domain)
 		
 
 	

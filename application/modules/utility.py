@@ -6,7 +6,10 @@ from modules.dto.activity_dto import ActivityDTO
 def send_get_request(url, headers={}, params={}):
     if headers == {}:
         headers = { "accept": "application/activity+json"}
-    return requests.get(url, headers=headers, params=params)
+    try:
+        return requests.get(url, headers=headers, params=params)
+    except Exception:
+        return None
 
 def send_post_request(url, headers, activity):
     return requests.post(url, headers=headers, data=activity)
@@ -114,17 +117,28 @@ def __get_follower_id_from_ext_url(data):
 def __get_inbox_urls(follower_ids):
     inboxes = []
     for id in follower_ids:
-        response = send_get_request(id)
-        inboxes.append(
-            json.loads(response.text)['inbox']
-        )
+        if isinstance(id, str):
+            response = send_get_request(id) 
+            if response is None or not response.ok:
+                continue
+
+            data = json.loads(response.text)
+            inboxes.append(data['inbox'])
+        elif isinstance(id, dict):
+            inboxes.append(id['inbox'])
+
     return inboxes
 
 def __get_outbox_urls(follower_ids):
     outboxes = []
     for id in follower_ids:
-        response = send_get_request(id)
-        outboxes.append(
-            json.loads(response.text)['outbox']
-        )
+        if isinstance(id, str):
+            response = send_get_request(id) 
+            if response is None or not response.ok:
+                continue
+
+            data = json.loads(response.text)
+            outboxes.append(data['outbox'])
+        elif isinstance(id, dict):
+            outboxes.append(id['outbox'])
     return outboxes

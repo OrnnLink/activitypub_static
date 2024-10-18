@@ -39,7 +39,6 @@ class WebfingerHandler:
             data = fd.readlines()
         for line in data:
             if "for" in line and username in line:
-                print("no write occurs")
                 return
 
         data.append("[[headers]]\n")
@@ -64,7 +63,7 @@ class WebfingerHandler:
     
     def __make_webfinger_dirs(self):
         dirname = f"{self.config_handler.static_dir_path}/.well-known"
-        print(make_directory(dirname))
+        make_directory(dirname)
 
         return self
      
