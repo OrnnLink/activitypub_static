@@ -41,5 +41,4 @@ if __name__ == "__main__":
     # Print the keys
     print('Public Key:', public_pem.decode('utf-8'))
     print('Private Key:', private_pem.decode('utf-8'))
-
 """

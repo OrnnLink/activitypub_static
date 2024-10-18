@@ -44,8 +44,8 @@ def tear_down_test_folders():
 def __make_config_file():
     filename = "tests/config.json"
     data = {
-        "username": "",
-        "domain": "",
+        "username": "noah",
+        "domain": "staticap.netlify.app",
         "private_key_path": "tests/resources/private_key.pem",
         "public_key_path": "tests/resources/public_key.pem",
         "site_dir_path": "tests/activitypub",
