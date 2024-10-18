@@ -32,6 +32,7 @@ def write_key_to_files(private_pem, public_pem, path=""):
     with open(path + 'private_key.pem', 'wb') as private_file:
         private_file.write(private_pem)
 
+"""
 if __name__ == "__main__":
     private_pem, public_pem = generate_key()
     # Save the keys to files
@@ -41,3 +42,4 @@ if __name__ == "__main__":
     print('Public Key:', public_pem.decode('utf-8'))
     print('Private Key:', private_pem.decode('utf-8'))
 
+"""
