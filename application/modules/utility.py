@@ -59,11 +59,11 @@ def extract_followers_outbox(follower_url):
         domain = data[2]
         outboxes[i] = ActivityDTO(domain=domain, outbox_url=outboxes[i])
     return outboxes
-        
+
 def __get_follower_ids(follower_url):
     response = send_get_request(follower_url)
     data = json.loads(response.text)
-    
+
     if "orderedItems" in data:
         return __get_follower_id_from_ordered_items(data)
     return __get_follower_id_from_ext_url(data)
@@ -71,38 +71,38 @@ def __get_follower_ids(follower_url):
 def __get_follower_id_from_ordered_items(data):
     items = data["orderedItems"]
     ids = []
-    for item in items: 
+    for item in items:
         if type(item) == str:
             ids.append(item)
-        elif type(item) == dict: 
+        elif type(item) == dict:
             ids.append(item['id'])
     return items
-        
+
 def __get_follower_id_from_ext_url(data):
-    excluded_keys = [ "@context", "id", "type", "totalItems"] 
+    excluded_keys = [ "@context", "id", "type", "totalItems"]
     urls = []
     # Getting relevant urls
     for key in data:
         if key not in excluded_keys:
             urls.append(data[key])
-    
+
     total = data['totalItems']
-    follower_ids = [] 
+    follower_ids = []
     while True:
         url = urls.pop(0)
         response = requests.get(url, headers={ "accept": "application/activity+json"})
         json_data = json.loads(response.text)
-            
-        if "orderedItems" not in json_data.keys(): 
-            break 
-        
+
+        if "orderedItems" not in json_data.keys():
+            break
+
         for item in json_data['orderedItems']:
             if type(item) == str:
                 follower_ids.append(item)
-            elif type(item) == dict: 
+            elif type(item) == dict:
                 follower_ids.append(item['id'])
-        
-        if len(follower_ids) >= total: 
+
+        if len(follower_ids) >= total:
             break
 
         # Registered the next urls
@@ -110,7 +110,7 @@ def __get_follower_id_from_ext_url(data):
             urls.append(json_data["next"])
         elif "last" in json_data.keys():
             urls.append(json_data["last"])
-        else: 
+        else:
             break
     return follower_ids
 
@@ -118,7 +118,7 @@ def __get_inbox_urls(follower_ids):
     inboxes = []
     for id in follower_ids:
         if isinstance(id, str):
-            response = send_get_request(id) 
+            response = send_get_request(id)
             if response is None or not response.ok:
                 continue
 
@@ -133,7 +133,7 @@ def __get_outbox_urls(follower_ids):
     outboxes = []
     for id in follower_ids:
         if isinstance(id, str):
-            response = send_get_request(id) 
+            response = send_get_request(id)
             if response is None or not response.ok:
                 continue
 

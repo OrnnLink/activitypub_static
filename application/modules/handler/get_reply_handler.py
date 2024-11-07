@@ -9,9 +9,25 @@ class GetReplyHandler:
 
 	def get_replies(self) -> list:
 		outboxes = extract_followers_outbox(self.config_handler.follower_url)
+		followings = (self.get_followings())
+		for following in followings:
+			outbox = following.outbox_url
+			exists = False
+			for f in outboxes:
+				if f.outbox_url == outbox:
+					exists = True
+					break 
+			if not exists:
+				outboxes.append(following)
+		for f in outboxes:
+			print(f.outbox_url)
+
 		posts = self.__retrieve_posts_from_outboxes(outboxes)
 		filtered_posts = self.__filtered_posts(posts)
 		return filtered_posts
+
+	def get_followings(self) -> list:
+	   return extract_followers_outbox(self.config_handler.following_url)
 
 	def __retrieve_posts_from_outboxes(self, outboxes):
 		posts = []
@@ -22,7 +38,7 @@ class GetReplyHandler:
 				posts += self.__retrieve_posts_from_ordered_items(data['orderedItems'])
 			else:
 				posts += self.__retrieve_posts_from_nested_outbox(outbox_data=data)
-		return posts	
+		return posts
 
 	def __retrieve_posts_from_ordered_items(self, ordered_items: list, month_filter=3):
 		posts = []
@@ -41,7 +57,7 @@ class GetReplyHandler:
 		return posts
 
 	def __retrieve_posts_from_nested_outbox(self, outbox_data: dict):
-		url = outbox_data['first'] 
+		url = outbox_data['first']
 		posts = []
 		while True:
 			if isinstance(url, str):
@@ -51,7 +67,7 @@ class GetReplyHandler:
 			elif isinstance(url, dict):
 				data = url
 				new_posts = self.__retrieve_posts_from_ordered_items(url['orderedItems'])
-			else: 
+			else:
 				continue
 
 			if len(new_posts) == 0:
@@ -60,7 +76,7 @@ class GetReplyHandler:
 			if "next" in data.keys():
 				url = data['next']
 			else:
-				break	
+				break
 
 		return posts
 
@@ -71,11 +87,11 @@ class GetReplyHandler:
 			object_map = post.get("object", '')
 
 			if not activity_type or not object_map:
-				continue 
+				continue
 
 			if activity_type.lower() == "announce":
 				if (self.config_handler.domain in object_map and self.config_handler.username in object_map):
-					filtered_posts.append(post) 
+					filtered_posts.append(post)
 				continue
 			elif activity_type.lower() == "create":
 				in_reply_to = object_map.get("inReplyTo", "")
@@ -97,7 +113,7 @@ class GetReplyHandler:
 		else:
 			print(reply['object']['content'])
 
-	def __iterate_dict(self, data, indent=0): 
+	def __iterate_dict(self, data, indent=0):
 		for key in data:
 			values = data[key]
 			if isinstance(values, dict):
