@@ -4,6 +4,7 @@
     "partOf": "https://staticap.netlify.app/noah/user-info/following.json",
     "type": "OrderedCollectionPage",
     "orderedItems": [
-        "https://mastodon.social/users/pbandj9819"
+        "https://mastodon.social/users/pbandj9819",
+        "https://mastodon.world/users/peterjam"
     ]
 }

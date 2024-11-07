@@ -2,6 +2,6 @@
     "@context": "https://www.w3.org/ns/activitystreams",
     "id": "https://staticap.netlify.app/noah/user-info/following.json",
     "type": "OrderedCollection",
-    "totalItems": 1,
+    "totalItems": 2,
     "first": "https://staticap.netlify.app/noah/user-info/following/first.json"
 }
