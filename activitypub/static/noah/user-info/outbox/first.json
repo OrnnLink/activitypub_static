@@ -84,6 +84,33 @@
             "cc": [
                 "https://staticap.netlify.app/noah/user-info/followers.json"
             ]
+        },
+        {
+            "@context": "https://www.w3.org/ns/activitystreams",
+            "type": "Create",
+            "id": "https://staticap.netlify.app/page/noah/statuses/Something_Interesting",
+            "actor": "https://staticap.netlify.app/noah/user-info/actor.json",
+            "object": {
+                "id": "https://staticap.netlify.app/noah/content/statuses/Something_Interesting",
+                "type": "Note",
+                "published": "2024-11-07T00:54:48Z",
+                "content": "This is an interesting post",
+                "attributedTo": "https://staticap.netlify.app/noah/user-info/actor.json",
+                "to": [
+                    "https://staticap.netlify.app/noah/user-info/followers.json",
+                    "https://www.w3.org/ns/activitystreams#Public"
+                ],
+                "cc": [
+                    "https://staticap.netlify.app/noah/user-info/followers.json"
+                ]
+            },
+            "to": [
+                "https://staticap.netlify.app/noah/user-info/followers.json",
+                "https://www.w3.org/ns/activitystreams#Public"
+            ],
+            "cc": [
+                "https://staticap.netlify.app/noah/user-info/followers.json"
+            ]
         }
     ]
 }

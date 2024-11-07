@@ -1,3 +1,6 @@
 {
-  "webfingers": ["@pbandj9819@mastodon.social"]
+    "webfingers": [
+        "@pbandj9819@mastodon.social",
+        "@peterjam@mastodon.world"
+    ]
 }
