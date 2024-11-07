@@ -30,6 +30,7 @@ class ActivityController:
             return False
         response = self.handler['activity'].send_follow_activity(webfinger)
         data = { "webfinger": ""}
+        print("Success")
         self.__reset_activity(data, filename)
 
 
@@ -47,6 +48,7 @@ class ActivityController:
         self.handler['user'].remove_following(webfinger=webfinger)
         response = self.handler['activity'].send_unfollow_activity(webfinger)
         data = { "webfinger": ""}
+        print("Success")
         self.__reset_activity(data, filename)
 
     def create_user(self):
@@ -148,6 +150,3 @@ class ActivityController:
 
     def __reset_activity(self, data, filename):
         write_to_json(data, filename)
-
-
-        
